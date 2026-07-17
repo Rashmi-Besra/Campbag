@@ -105,10 +105,10 @@ const Product = new mongoose.Schema(
       default: 1,
     },
 
-    allowQuantitySelection: {
-      type: Boolean,
-      default: true,
-    },
+    // allowQuantitySelection: {
+    //   type: Boolean,
+    //   default: true,
+    // },
 
     // ========================
     // Status
@@ -118,6 +118,15 @@ const Product = new mongoose.Schema(
       enum: ["Available", "Reserved", "Sold"],
       default: "Available",
     },
+//     isApproved: {
+//     type: Boolean,
+//     default: false,
+// },
+
+// isActive: {
+//     type: Boolean,
+//     default: true,
+// },
 
     // ========================
     // Pickup
@@ -141,15 +150,15 @@ const Product = new mongoose.Schema(
     },
 
   
-    rating: {
-      type: Number,
-      default: 0,
-    },
+    // rating: {
+    //   type: Number,
+    //   default: 0,
+    // },
 
-    reviewCount: {
-      type: Number,
-      default: 0,
-    },
+    // reviewCount: {
+    //   type: Number,
+    //   default: 0,
+    // },
 
     // ========================
     // Campus Features
@@ -169,10 +178,10 @@ const Product = new mongoose.Schema(
       default: false,
     },
 
-    reported: {
-      type: Boolean,
-      default: false,
-    },
+    // reported: {
+    //   type: Boolean,
+    //   default: false,
+    // },
 
     // ========================
     // Notes Marketplace Fields
