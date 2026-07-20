@@ -31,6 +31,11 @@ import Searchbar from './components/Searchbar'
 import Completeprofile from './pages/Completeprofile'
 import EditProfile from './pages/Editprofile'
 import Profile from './pages/Profile'
+import Signup from './pages/SignUp'
+import VerifyOTP from './pages/VerifyOTP'
+import Wishlist from "./pages/Wishlist";
+
+
 import { ToastContainer, toast } from 'react-toastify';
 const App = () => {
   return (
@@ -48,11 +53,14 @@ const App = () => {
       <Route path="/notes/:noteId" element={<Note />} />
         <Route path='/cart' element={<Cart/>}/>
         <Route path='/login' element={<Login/>}/>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path='/place-order' element={<Placeorder/>}/>
         <Route path='/orders' element={<Orders/>}/>
         <Route path='/completeprofile' element={<Completeprofile/>}/>
         <Route path='/Profile' element={<Profile/>}/>
          <Route path='/edit-profile' element={<EditProfile/>}/>
+         <Route path="/wishlist" element={<Wishlist />} />
 
       </Routes>
       <Footer/>

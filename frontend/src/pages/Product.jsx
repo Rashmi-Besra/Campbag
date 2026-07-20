@@ -7,7 +7,7 @@ const Product = () => {
   const { productId } = useParams();
   const { products, currency, addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
-  const [image, setimage] = useState("");
+  const [images, setimage] = useState("");
   const [options, setoptions] = useState("");
   const [quantity, setquantity] = useState(1);
   const [open, setOpen] = useState("");
@@ -18,7 +18,7 @@ const Product = () => {
 
     if (item) {
       setProductData(item);
-      setimage(item.image[0]);
+      setimage(item.images?.[0]?.url);
     }
   };
 
@@ -33,18 +33,19 @@ const Product = () => {
         {/*Product image*/}
         <div className="flex-1  flex flex-col-reverse gap-3 sm:flex-row">
           <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll  justify-between sm:justify-normal sm:w-[18.7%] w-full">
-            {productData.image.map((item, index) => (
+            {productData.images.map((item, index) => (
               <img
-                onClick={() => setimage(item)}
-                src={item}
-                key={index}
+              key={index}
+                onClick={() => setimage(item.url)}
+                src={item.url}
+               
                 className="w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer "
                 alt=""
               />
             ))}
           </div>
           <div className="w-full sm:w-[80%]">
-            <img className="w-full h-auto" src={image} alt="" />
+            <img className="w-full h-auto" src={images} alt="" />
           </div>
         </div>
         {/*--------------------ProductInfo--------------------- */}
@@ -221,7 +222,7 @@ const Product = () => {
 
       {/*------------------------Related Product---------------------------------------------*/}
       <RelatedProducts
-        Category={productData.Category}
+        Category={productData.category}
         subCategory={productData.subCategory}
       />
     </div>

@@ -295,7 +295,7 @@ console.log(
 
               id={item._id}
 
-              image={item.image}
+              image={item.images}
 
               name={item.name}
 

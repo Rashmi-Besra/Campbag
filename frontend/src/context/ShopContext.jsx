@@ -1,7 +1,20 @@
 import { createContext,useState, useEffect, } from "react";
-import { products } from "../assets/assets";
+import api from "../api/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import {
+    getWishlist,
+    addToWishlist,
+    removeFromWishlist
+} from "../services/wishlistService";
+
+import {
+    getCart,
+    addToCart as addToCartAPI,
+    updateCart as updateCartAPI,
+    clearCart
+} from "../services/cartService";
+
 export const ShopContext=createContext();
 
 const ShopContextProvider=(props)=>{
@@ -13,47 +26,31 @@ const ShopContextProvider=(props)=>{
     const navigate=useNavigate();
     const[search,setSearch]=useState('');
     const[showSearch,setShowSearch]=useState(false); 
-   
-    const addToCart=async (ItemId,options,quantity)=>{
-         let cartData=structuredClone(cartItems);
-        const pro=products.find(item =>item._id === ItemId);
-                 
-        if(pro.options && !options){
-            toast.error('Select Product Options');
-            return
-        }
-        console.log("Product:", pro);
-        console.log("Selected option:", options);
+    const [wishlist,setWishlist]=useState([]);
+    const [products,setProducts]=useState([]);
 
-         const optionkey=options|| "default";
-        if (cartData[ItemId] && typeof cartData[ItemId]==="object") {
-           
-            if(cartData[ItemId][optionkey]){
-                const newQuantity=cartData[ItemId][optionkey]+quantity;
-               if(newQuantity>pro.quantity){
-                toast.error(`Only ${pro.quantity} items available`);
-                return;
-               }
-                cartData[ItemId][optionkey]=newQuantity;
-            }
-            else{
-               if(quantity >pro.quantity){
-                toast.error(`Only ${pro.quantity} items available`);
-                return;
-               }
-               cartData[ItemId][optionkey]=quantity;
-            }
-        }
-        else{
-          if(quantity>pro.quantity){
-            toast.error(`Only ${pro.quantity} items available`);
-            return;
-          }
-          cartData[ItemId]={};
-          cartData[ItemId][optionkey]=quantity;
-        }
-        setcartItems(cartData);
+    const [token, setToken] = useState(localStorage.getItem("token"));
+
+
+const addToCart = async (ItemId, options, quantity) => {
+    try {
+
+        const optionKey = options || "default";
+
+        await addToCartAPI(ItemId, optionKey, quantity);
+
+        await fetchCart();
+
+        toast.success("Added to cart");
+
+    } catch (error) {
+
+        toast.error(
+            error.response?.data?.message || "Failed to add item"
+        );
+
     }
+};
 
     const getCartCount=()=>{
         let Totalcount=0;
@@ -65,6 +62,7 @@ const ShopContextProvider=(props)=>{
 
                     }
                 } catch (error) {
+                    console.log(error.message);
                     
                 }
             }
@@ -72,14 +70,26 @@ const ShopContextProvider=(props)=>{
         return Totalcount;
     }
 
-    const updateQuantity = (ItemId, option, quantity) => {
-   let cartData = structuredClone(cartItems);
+  const updateQuantity = async (ItemId, option, quantity) => {
+    try {
 
-   cartData[ItemId][option] = quantity;
+        await updateCartAPI(
+            ItemId,
+            option,
+            quantity
+        );
 
-   setcartItems(cartData);
-}
+        await fetchCart();
 
+    } catch (error) {
+
+        toast.error(
+            error.response?.data?.message ||
+            "Unable to update cart"
+        );
+
+    }
+};
 const getCartAmount=()=>{
     let totalAmount=0;
     for(const items in cartItems){
@@ -90,6 +100,7 @@ const getCartAmount=()=>{
                     totalAmount+=itemInfo.price*cartItems[items][item];
                 }
             } catch (error) {
+                console.log(error.message);
                 
             }
         }
@@ -114,7 +125,7 @@ const getCartAmount=()=>{
             orderItems.push({
                 _id:productId,
                 name: productInfo.name,
-                image: productInfo.image[0],
+                image: productInfo.images?.[0]?.url,
                 price: productInfo.price,
                 quantity: cartItems[productId][size],
                 size:size
@@ -144,7 +155,108 @@ const getCartAmount=()=>{
    
  }
 
+ const fetchProducts = async () => {
 
+    try {
+
+        const response = await api.get("/product");
+
+        if(response.data.success){
+
+            setProducts(response.data.products);
+
+        }
+
+    }
+    catch(error){
+
+        console.log(error.message);
+
+    }
+
+}
+
+const fetchCart = async () => {
+    try {
+
+        const response = await getCart();
+
+        if (response.success) {
+
+            const backendCart = {};
+
+            response.cart.items.forEach((item) => {
+
+                if (!backendCart[item.product._id]) {
+                    backendCart[item.product._id] = {};
+                }
+
+                backendCart[item.product._id][item.option] =
+                    item.quantity;
+
+            });
+
+            setcartItems(backendCart);
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+};
+
+const fetchWishlist = async () => {
+  try {
+    const response = await getWishlist();
+
+    if (response.success) {
+      if (response.wishlist && response.wishlist.products) {
+        setWishlist(response.wishlist.products);
+      } else {
+        setWishlist([]);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const toggleWishlist = async (productId) => {
+  try {
+    // Check if product already exists in wishlist
+    const exists = wishlist.some(
+      (item) => item.product._id === productId
+    );
+
+    if (exists) {
+      await removeFromWishlist(productId);
+    } else {
+      await addToWishlist(productId);
+    }
+
+    // Refresh wishlist after update
+    await fetchWishlist();
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+useEffect(() => {
+
+    fetchProducts();
+
+    if (token) {
+
+        fetchWishlist();
+
+        fetchCart();
+
+    }
+
+}, [token]);
 
     const value={
         products,currency,delivery_fee,
@@ -153,7 +265,9 @@ const getCartAmount=()=>{
         updateQuantity,getCartAmount,
         navigate,placeOrder,
         orders,setOrders,search,
-        setSearch,showSearch,setShowSearch
+        setSearch,showSearch,setShowSearch,
+        wishlist,setWishlist,fetchWishlist,
+        toggleWishlist
        
     }
     return (

@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema(
   {
-    // Cart Owner
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -10,13 +9,17 @@ const cartSchema = new mongoose.Schema(
       unique: true,
     },
 
-    // Products in Cart
     items: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
+        },
+
+        option: {
+          type: String,
+          default: "default",
         },
 
         quantity: {
@@ -31,6 +34,8 @@ const cartSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+
 
 const Cart =
   mongoose.models.Cart ||
