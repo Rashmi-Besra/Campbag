@@ -15,6 +15,11 @@ import {
     clearCart
 } from "../services/cartService";
 
+import {
+    placeOrder as placeOrderAPI,
+    getOrders as getOrdersAPI
+} from "../services/orderService";
+
 export const ShopContext=createContext();
 
 const ShopContextProvider=(props)=>{
@@ -108,31 +113,36 @@ const getCartAmount=()=>{
     return totalAmount;
 }
 
- useEffect(()=>{
-        const savedOrders=
-        JSON.parse(localStorage.getItem("orders")) || [];
-        setOrders(savedOrders);
-    },[])
 
- const placeOrder=()=>{
-    let orderItems=[];
-    for(const productId in cartItems){
-        const productInfo=
-        products.find(
-            item=>item._id ===productId
-        );
-        for (const size in cartItems[productId]){
-            orderItems.push({
-                _id:productId,
-                name: productInfo.name,
-                image: productInfo.images?.[0]?.url,
-                price: productInfo.price,
-                quantity: cartItems[productId][size],
-                size:size
 
-            });
+const placeOrder = async () => {
+
+    try {
+
+        const response = await placeOrderAPI();
+
+        if (response.success) {
+
+            toast.success(response.message);
+
+            await fetchOrders();
+
+            await fetchCart();
+
+            navigate("/orders");
+
         }
+
+    } catch (error) {
+
+        toast.error(
+            error.response?.data?.message ||
+            "Order failed"
+        );
+
     }
+
+};
     
 
     const orderData={
@@ -146,10 +156,7 @@ const getCartAmount=()=>{
     const updateOrders= [...orders, orderData];
     setOrders(updateOrders);
     
-    localStorage.setItem(
-        "orders",
-        JSON.stringify(updateOrders)
-    );
+    
     console.log(orderData);
     setcartItems({});
    
@@ -175,6 +182,26 @@ const getCartAmount=()=>{
     }
 
 }
+
+const fetchOrders = async () => {
+
+    try {
+
+        const response = await getOrdersAPI();
+
+        if (response.success) {
+
+            setOrders(response.orders);
+
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+};
 
 const fetchCart = async () => {
     try {
@@ -253,6 +280,8 @@ useEffect(() => {
         fetchWishlist();
 
         fetchCart();
+
+        fetchOrders();
 
     }
 

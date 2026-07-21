@@ -7,7 +7,7 @@ import userRoute from './Route/userRoute.js'
 import productRoute from "./Route/productRoute.js";
 import wishlistRoute from "./Route/wishlistRoute.js";
 import cartRoute from "./Route/cartRoute.js";
-
+import orderRoute from './Route/orderRoute.js'
 
 
 
@@ -26,7 +26,7 @@ app.use('/api/user',userRoute)
 app.use("/api/product", productRoute);
 app.use("/api/wishlist", wishlistRoute);
 app.use("/api/cart", cartRoute);
-
+app.use("/api/order", orderRoute);
 app.get('/',(req,res)=>{
     res.send("API working")
 })

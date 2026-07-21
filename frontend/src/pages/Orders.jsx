@@ -25,10 +25,10 @@ console.log("Type =", typeof orders);
               <div key={itemIndex}
               className='py-4 border-t border-b text-gray-700 flex flex-col md:flex-row gap-4'>
                 <div className='flex items-start gap-6 text-sm'>
-                  <img  className='w-16 sm:w-20' src={item.images?.[0]?.url} alt={item.name} />
+                  <img  className='w-16 sm:w-20' src={item.product.images?.[0]?.url} alt={item.product.name} />
 
                   <div>
-                    <p className='sm:text-base font-medium'>{item.name}</p>
+                    <p className='sm:text-base font-medium'>{item.product.name}</p>
 
                     <div className='flex items-center gap-3 mt-2 text-base'>
                       <p>{currency}{item.price}</p>
