@@ -1,29 +1,21 @@
-import axios from "axios";
+import api from "../api/api";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
-});
+
+console.log(import.meta.env.VITE_BACKEND_URL);
+
 
 // Automatically attach JWT token
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
 
 // Get Cart
 export const getCart = async () => {
-  const { data } = await API.get("/api/cart");
+  const { data } = await api.get("/cart");
   return data;
 };
 
 // Add Item
 export const addToCart = async (productId, option, quantity = 1) => {
-  const { data } = await API.post("/api/cart/add", {
+  const { data } = await api.post("/cart/add", {
     productId,
     option,
     quantity,
@@ -34,7 +26,7 @@ export const addToCart = async (productId, option, quantity = 1) => {
 
 // Update Quantity
 export const updateCart = async (productId, option, quantity) => {
-  const { data } = await API.put("/api/cart/update", {
+  const { data } = await api.put("/cart/update", {
     productId,
     option,
     quantity,
@@ -45,6 +37,7 @@ export const updateCart = async (productId, option, quantity) => {
 
 // Clear Cart
 export const clearCart = async () => {
-  const { data } = await API.delete("/api/cart/clear");
+  const { data } = await api.delete("/cart/clear");
   return data;
 };
+

@@ -74,11 +74,19 @@ for (const file of req.files) {
 
   condition,
 
-  seller,
+  seller:req.user._id,
 
   images: uploadedImages,
 
 });
+
+
+await User.findByIdAndUpdate(
+    req.user._id,
+    {
+        isSeller: true,
+    }
+);
 return res.status(201).json({
 
   success: true,

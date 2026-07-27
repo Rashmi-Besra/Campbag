@@ -24,6 +24,7 @@ const Product = new mongoose.Schema(
     // ========================
     // Seller Information
     // ========================
+
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -150,15 +151,15 @@ const Product = new mongoose.Schema(
     },
 
   
-    // rating: {
-    //   type: Number,
-    //   default: 0,
-    // },
+    rating: {
+      type: Number,
+      default: 0,
+    },
 
-    // reviewCount: {
-    //   type: Number,
-    //   default: 0,
-    // },
+    reviewCount: {
+      type: Number,
+      default: 0,
+    },
 
     // ========================
     // Campus Features
@@ -173,6 +174,15 @@ const Product = new mongoose.Schema(
       default: false,
     },
 
+    wishlistCount: {
+    type: Number,
+    default: 0,
+},
+
+soldCount: {
+    type: Number,
+    default: 0,
+},
     featured: {
       type: Boolean,
       default: false,

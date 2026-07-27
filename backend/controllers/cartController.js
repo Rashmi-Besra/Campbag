@@ -6,6 +6,8 @@ import {
 } from "../validators/cartValidator.js";
 
 export const addToCart = async (req, res) => {
+  console.log("BODY:", req.body);
+    console.log("HEADERS:", req.headers);
   try {
 
     // Validate request

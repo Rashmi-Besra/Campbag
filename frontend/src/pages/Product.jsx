@@ -3,29 +3,157 @@ import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/assets";
 import RelatedProducts from "../components/RelatedProducts";
+import RatingSummary from "../components/reviews/RatingSummary";
+import { toast } from "react-toastify";
+import ReviewForm from "../components/reviews/ReviewForm";
+import ReviewList from "../components/reviews/ReviewList";
+import {
+    getProductReviews,
+    createReview,
+    updateReview,
+    deleteReview,
+} from "../services/reviewService";
+
+
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart,fetchProducts,user } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [images, setimage] = useState("");
   const [options, setoptions] = useState("");
   const [quantity, setquantity] = useState(1);
   const [open, setOpen] = useState("");
   const dropdownRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
 
-  const fetchproductdata = () => {
-    const item = products.find((item) => item._id === productId);
+const [editingReview, setEditingReview] = useState(null);
+
+const [reviewLoading, setReviewLoading] = useState(false);
+
+
+const fetchproductdata = () => {
+  const item = products.find((item) => item._id === productId);
+
+  if (item) {
+    setProductData(item);
+    setimage(item.images?.[0]?.url);
+  }
+};
+
+  const handleReviewSubmit = async (formData) => {
+
+    try {
+
+        setReviewLoading(true);
+
+        if (editingReview) {
+
+            await updateReview(
+                editingReview._id,
+                formData
+            );
+
+            toast.success(
+                "Review updated successfully."
+            );
+
+        } else {
+
+            await createReview({
+
+                ...formData,
+
+                product: productId,
+
+            });
+
+            toast.success(
+                "Review added successfully."
+            );
+
+        }
+
+       await fetchReviews();
+await fetchProducts();
+
+
+        setEditingReview(null);
+
+    } catch (error) {
+
+        toast.error(
+            error.response?.data?.message ||
+            error.message
+        );
+
+    } finally {
+
+        setReviewLoading(false);
+
+    }
+
+};
+
+const handleDeleteReview = async (reviewId) => {
+  const confirmDelete = window.confirm(
+    "Delete this review?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await deleteReview(reviewId);
+
+    await fetchReviews();
+
+    await fetchProducts();
+
+    toast.success("Review deleted.");
+
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      "Unable to delete review."
+    );
+  }
+};
+
+const fetchReviews = async () => {
+  try {
+    const data = await getProductReviews(productId);
+    setReviews(data.reviews);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const handleEditReview = (review) => {
+
+    setEditingReview(review);
+
+};
+
+useEffect(() => {
+  if (products.length > 0) {
+    const item = products.find(
+      (p) => p._id === productId
+    );
 
     if (item) {
       setProductData(item);
       setimage(item.images?.[0]?.url);
     }
-  };
+  }
+}, [products, productId]);
 
-  useEffect(() => {
-    fetchproductdata();
-  }, [productId, products]);
+useEffect(() => {
+  if (productId) {
+    fetchReviews();
+  }
+}, [productId]);
 
+
+console.log("Logged in user:", JSON.stringify(user, null, 2));
   return productData ? (
     <div className=" border-t-2 pt-19 transition-opacity ease-in  duration-500 opacity-100">
       {/*Product Data*/}
@@ -127,6 +255,8 @@ const Product = () => {
             >
               ADD TO CART
             </button>
+         
+
             <hr className="mt-8 sm:w-4/5" />
             <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
               <p>100% Orginal Product</p>
@@ -219,6 +349,27 @@ const Product = () => {
         </div>
         <div>Contact</div>
       </div>
+      <RatingSummary
+    averageRating={
+        productData.rating
+    }
+    reviewCount={
+        productData.reviewCount
+    }
+/>
+
+<ReviewForm
+    initialReview={editingReview}
+    onSubmit={handleReviewSubmit}
+    loading={reviewLoading}
+/>
+
+<ReviewList
+    reviews={reviews}
+    currentUserId={user?.id}
+    onEdit={handleEditReview}
+    onDelete={handleDeleteReview}
+/>
 
       {/*------------------------Related Product---------------------------------------------*/}
       <RelatedProducts

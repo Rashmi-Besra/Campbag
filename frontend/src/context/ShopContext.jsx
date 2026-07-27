@@ -20,10 +20,19 @@ import {
     getOrders as getOrdersAPI
 } from "../services/orderService";
 
+import {
+    getDashboard as getSellerDashboard,
+    getSellerOrders as getSellerOrdersAPI,
+    updateOrderStatus as updateOrderItemStatusAPI,
+    getSellerProducts as getMyProductsAPI,
+    deleteProduct as deleteProductAPI
+} from "../services/sellerService";
+
+
 export const ShopContext=createContext();
 
 const ShopContextProvider=(props)=>{
-
+   
     const currency='₹';
     const delivery_fee=10;
     const [cartItems,setcartItems]=useState({});
@@ -33,6 +42,12 @@ const ShopContextProvider=(props)=>{
     const[showSearch,setShowSearch]=useState(false); 
     const [wishlist,setWishlist]=useState([]);
     const [products,setProducts]=useState([]);
+    const [sellerStats, setSellerStats] = useState(null);
+    const [sellerOrders, setSellerOrders] = useState([]);
+    const [sellerProducts, setSellerProducts] = useState([]);
+    const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+);
 
     const [token, setToken] = useState(localStorage.getItem("token"));
 
@@ -50,11 +65,16 @@ const addToCart = async (ItemId, options, quantity) => {
 
     } catch (error) {
 
-        toast.error(
-            error.response?.data?.message || "Failed to add item"
-        );
+    console.log(error);
 
-    }
+    console.log(error.response);
+
+    console.log(error.response?.data);
+
+    toast.error(
+        error.response?.data?.message || "Failed to add item"
+    );
+}
 };
 
     const getCartCount=()=>{
@@ -115,11 +135,11 @@ const getCartAmount=()=>{
 
 
 
-const placeOrder = async () => {
+const placeOrder = async (orderData) => {
 
     try {
 
-        const response = await placeOrderAPI();
+        const response = await placeOrderAPI(orderData);
 
         if (response.success) {
 
@@ -135,32 +155,19 @@ const placeOrder = async () => {
 
     } catch (error) {
 
-        toast.error(
-            error.response?.data?.message ||
-            "Order failed"
-        );
+    console.log(error);
+    console.log(error.response);
+    console.log(error.response?.data);
 
-    }
+    toast.error(
+        error.response?.data?.message || "Order failed"
+    );
+
+}
 
 };
     
 
-    const orderData={
-        id: Date.now(),
-        items: orderItems,
-        amount:getCartAmount(),
-        status: "Order Placed",
-        date: new Date()
-    }
-
-    const updateOrders= [...orders, orderData];
-    setOrders(updateOrders);
-    
-    
-    console.log(orderData);
-    setcartItems({});
-   
- }
 
  const fetchProducts = async () => {
 
@@ -271,6 +278,92 @@ const toggleWishlist = async (productId) => {
   }
 };
 
+
+const fetchSellerDashboard = async () => {
+    try {
+        const response = await getSellerDashboard();
+
+        if (response.success) {
+            setSellerStats(response.stats);
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error(
+            error.response?.data?.message || "Failed to load dashboard"
+        );
+    }
+};
+
+const fetchSellerOrders = async () => {
+    try {
+        const response = await getSellerOrdersAPI();
+
+        if (response.success) {
+            setSellerOrders(response.orders);
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error(
+            error.response?.data?.message || "Failed to load orders"
+        );
+    }
+};
+
+const updateOrderItemStatus = async (orderId, itemId, status) => {
+    try {
+
+        const response = await updateOrderItemStatusAPI(orderId, itemId, status);
+
+        if (response.success) {
+            toast.success(response.message);
+            await fetchSellerOrders();
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error(
+            error.response?.data?.message || "Failed to update status"
+        );
+    }
+};
+
+const fetchMyProducts = async () => {
+    try {
+        const response = await getMyProductsAPI();
+
+        if (response.success) {
+            setSellerProducts(response.products);
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error(
+            error.response?.data?.message || "Failed to load products"
+        );
+    }
+};
+
+const deleteMyProduct = async (productId) => {
+    try {
+
+        const response = await deleteProductAPI(productId);
+
+        if (response.success) {
+            toast.success(response.message);
+            await fetchMyProducts();
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error(
+            error.response?.data?.message || "Failed to delete product"
+        );
+    }
+};
+
+
 useEffect(() => {
 
     fetchProducts();
@@ -296,14 +389,20 @@ useEffect(() => {
         orders,setOrders,search,
         setSearch,showSearch,setShowSearch,
         wishlist,setWishlist,fetchWishlist,
-        toggleWishlist
-       
+        toggleWishlist,
+        sellerStats, sellerOrders, sellerProducts,
+        fetchSellerDashboard, fetchSellerOrders,
+        updateOrderItemStatus, fetchMyProducts, deleteMyProduct,
+        user,setUser,fetchProducts
     }
+       
+    
     return (
         <ShopContext.Provider value={value}>
             {props.children}
         </ShopContext.Provider>
-    )
-}
+    );
+};
+
 
 export default ShopContextProvider;

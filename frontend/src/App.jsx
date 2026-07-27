@@ -34,7 +34,11 @@ import Profile from './pages/Profile'
 import Signup from './pages/SignUp'
 import VerifyOTP from './pages/VerifyOTP'
 import Wishlist from "./pages/Wishlist";
-
+import SellerDashboard from "./pages/SellerDashboard";
+import SellerProducts from "./pages/SellerProducts";
+import AddProduct from './pages/AddProduct'
+import SellerOrders from "./pages/SellerOrders";
+import EditProduct from "./pages/EditProduct";
 
 import { ToastContainer, toast } from 'react-toastify';
 const App = () => {
@@ -61,6 +65,17 @@ const App = () => {
         <Route path='/Profile' element={<Profile/>}/>
          <Route path='/edit-profile' element={<EditProfile/>}/>
          <Route path="/wishlist" element={<Wishlist />} />
+         <Route path="/seller" element={<SellerDashboard />} />
+
+<Route path="/seller/products" element={<SellerProducts />} />
+
+<Route path="/seller/add-product" element={<AddProduct />} />
+
+<Route path="/seller/orders" element={<SellerOrders />} />
+<Route
+    path="/seller/edit-product/:id"
+    element={<EditProduct />}
+/>
 
       </Routes>
       <Footer/>

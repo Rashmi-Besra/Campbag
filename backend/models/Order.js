@@ -30,6 +30,17 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+      orderStatus: {
+      type: String,
+      enum: [
+        "Placed",
+        "Packed",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+      ],
+      default: "Placed",
+    },
       },
     ],
 
@@ -55,17 +66,28 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
 
-    orderStatus: {
-      type: String,
-      enum: [
-        "Placed",
-        "Packed",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-      ],
-      default: "Placed",
+ 
+
+    deliveryMethod: {
+    type: String,
+    enum: ["HOSTEL_DELIVERY", "SELF_PICKUP"],
+    required: true,
+},
+
+deliveryDetails: {
+    address: {
+        type: String,
+        default: "",
     },
+    phone: {
+        type: String,
+        default: "",
+    },
+    instructions: {
+        type: String,
+        default: "",
+    },
+},
   },
   {
     timestamps: true,

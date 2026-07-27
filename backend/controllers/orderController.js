@@ -1,10 +1,38 @@
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import { placeOrderSchema } from "../validators/orderValidator.js";
+
+
 
 export const placeOrder = async (req, res) => {
     try {
 
+        const result = placeOrderSchema.safeParse(req.body);
+
+        if (!result.success) {
+
+    return res.status(400).json({
+
+        success: false,
+
+        errors: result.error.issues
+
+    });
+
+}
+
+const {
+
+    deliveryMethod,
+
+    address,
+
+    phone,
+
+    instructions
+
+} = result.data;
         const cart = await Cart.findOne({
             user: req.user._id
         }).populate("items.product");
@@ -47,14 +75,31 @@ export const placeOrder = async (req, res) => {
             totalAmount += product.price * item.quantity;
         }
 
-        const order = await Order.create({
-            user: req.user._id,
-            items: orderItems,
-            totalAmount,
-            deliveryFee: 10,
-            paymentMethod: "COD"
-        });
+      const order = await Order.create({
 
+    user: req.user._id,
+
+    items: orderItems,
+
+    totalAmount,
+
+    deliveryFee:10,
+
+    paymentMethod:"COD",
+
+    deliveryMethod,
+
+    deliveryDetails:{
+
+        address,
+
+        phone,
+
+        instructions
+
+    }
+
+});
         for (const item of cart.items) {
 
             await Product.findByIdAndUpdate(

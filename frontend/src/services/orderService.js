@@ -1,24 +1,15 @@
-import axios from "axios";
+import api from "../api/api";
 
-const API = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-});
+// Automatically attach JWT token
 
-API.interceptors.request.use((config) => {
-
-    const token = localStorage.getItem("token");
-
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-});
 
 // Place Order
-export const placeOrder = async () => {
+export const placeOrder = async (orderData) => {
 
-    const { data } = await API.post("/api/order/place");
+    const { data } = await api.post(
+        "/order/place",
+        orderData
+    );
 
     return data;
 };
@@ -26,7 +17,7 @@ export const placeOrder = async () => {
 // Get Orders
 export const getOrders = async () => {
 
-    const { data } = await API.get("/api/order");
+    const { data } = await api.get("/order");
 
     return data;
 };

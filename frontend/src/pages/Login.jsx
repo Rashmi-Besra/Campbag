@@ -32,7 +32,8 @@ const Login = () => {
       if (response.success) {
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
-
+        setToken(response.token);
+        setUser(response.user);
         toast.success(response.message);
 
         navigate("/");
