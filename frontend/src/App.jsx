@@ -39,6 +39,9 @@ import SellerProducts from "./pages/SellerProducts";
 import AddProduct from './pages/AddProduct'
 import SellerOrders from "./pages/SellerOrders";
 import EditProduct from "./pages/EditProduct";
+import SellerProfile from './pages/SellerProfile';
+
+
 
 import { ToastContainer, toast } from 'react-toastify';
 const App = () => {
@@ -75,6 +78,10 @@ const App = () => {
 <Route
     path="/seller/edit-product/:id"
     element={<EditProduct />}
+/>
+<Route
+    path="/seller/:sellerId"
+    element={<SellerProfile />}
 />
 
       </Routes>

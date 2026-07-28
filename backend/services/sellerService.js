@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
-import cloudinary from "../config/cloudinary.js";
+import { cloudinary } from "../config/cloudinary.js";
 import streamifier from "streamifier";
+import User from "../models/User.js";
 
 /* ---------------- Dashboard ---------------- */
 
@@ -73,43 +74,54 @@ export const createProductService = async (
 
 ) => {
 
-    const imageUrls = [];
+    console.log("========== SERVICE ==========");
+    console.log(productData);
+   const images = [];
 
-    if (files && files.length > 0) {
+if (files && files.length > 0) {
 
-        for (const file of files) {
+    for (const file of files) {
 
-            const result = await uploadToCloudinary(file.buffer);
+        const result = await uploadToCloudinary(file.buffer);
 
-            imageUrls.push(result.secure_url);
-
-        }
+        images.push({
+            url: result.secure_url,
+            public_id: result.public_id,
+        });
 
     }
 
-    const product = await Product.create({
+}
 
-        seller: sellerId,
+    const seller = await User.findById(sellerId);
 
-        name: productData.name,
+if (!seller) {
+    throw new Error("Seller not found");
+}
 
-        description: productData.description,
+   const product = await Product.create({
 
-        category: productData.category,
+    seller: sellerId,
+    sellername: seller.name,
 
-        price: Number(productData.price),
+    name: productData.name,
+    description: productData.description,
 
-        quantity: Number(productData.quantity),
+    category: productData.category,
+    subCategory: productData.subCategory,
+    price: Number(productData.price),
 
-        branch: productData.branch,
+    quantity: Number(productData.quantity),
 
-        semester: productData.semester,
+    branch: productData.branch,
 
-        condition: productData.condition,
+    semester: productData.semester,
 
-        image: imageUrls,
+    condition: productData.condition,
 
-    });
+    images,
+
+});
 
     return product;
 
@@ -195,6 +207,7 @@ export const updateSellerProductService = async (
     product.name = productData.name;
     product.description = productData.description;
     product.category = productData.category;
+    product.subCategory=productData.subCategory;
     product.price = Number(productData.price);
     product.quantity = Number(productData.quantity);
     product.branch = productData.branch;

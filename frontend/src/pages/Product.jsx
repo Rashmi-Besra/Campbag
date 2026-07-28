@@ -347,7 +347,11 @@ console.log("Logged in user:", JSON.stringify(user, null, 2));
           )}
           <hr className="mt-2 sm:w-3/5" />
         </div>
-        <div>Contact</div>
+        <div>
+          <div>Contact</div>
+          <p>{productData.seller.name}</p>
+        </div>
+        
       </div>
       <RatingSummary
     averageRating={

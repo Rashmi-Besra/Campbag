@@ -82,19 +82,7 @@ const Collection = () => {
   ==========================================
   */
 
-  const searchResults=products.filter((item)=>
-  item.name.toLowerCase().includes(search.toLowerCase()) ||
-  item.category.toLowerCase().includes(search.toLowerCase())||
-  item.subCategory.toLowerCase().includes(search.toLowerCase()) 
-);
 
-  useEffect(()=>{
-    const timeout= setTimeout(()=>{
-    
-      setFilteredProducts(searchResult);
-    },300);
-    return ()=> clearTimeout(timeout);
-  },[search,products])
 
 
   const toggleColor = (color) => {
@@ -158,17 +146,19 @@ console.log(
     ----------------------------------------
     */
 
-    productsCopy = productsCopy.filter(product =>
+  if (category) {
+  productsCopy = productsCopy.filter(
+    product =>
+      product.category?.toLowerCase().trim() === category.toLowerCase().trim()
+  );
+}
 
-  product.category?.toLowerCase().trim() ===
-  category?.toLowerCase().trim()
-
-  &&
-
-  product.subCategory?.toLowerCase().trim() ===
-  subCategory?.toLowerCase().trim()
-
-)
+if (subCategory) {
+  productsCopy = productsCopy.filter(
+    product =>
+      product.subCategory?.toLowerCase().trim() === subCategory.toLowerCase().trim()
+  );
+}
 
 
     /*

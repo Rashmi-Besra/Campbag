@@ -6,6 +6,7 @@ const defaultFormData = {
   name: "",
   description: "",
   category: "",
+  subCategory:"",
   price: "",
   quantity: "",
   branch: "",
@@ -61,7 +62,11 @@ const ProductForm = ({
         data.append("images", image);
       }
     });
+    console.log("formData:", formData);
 
+for (const [key, value] of data.entries()) {
+  console.log(key, value);
+}
     onSubmit(data);
   };
 
@@ -161,7 +166,7 @@ const ProductForm = ({
           <label className="block font-medium mb-2">
             Category
           </label>
-
+          
           <input
             type="text"
             name="category"
@@ -171,6 +176,23 @@ const ProductForm = ({
             required
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
+        </div>
+        <div>
+           <label className="block font-medium mb-2">
+            SubCategory
+          </label>
+
+          <input
+            type="text"
+            name="subCategory"
+            placeholder="e.g. men,women"
+            value={formData.subCategory}
+            onChange={handleChange}
+            required
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+          />
+
+
         </div>
 
         <div>

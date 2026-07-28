@@ -8,10 +8,9 @@ const ProductItems = ({id,images,name,price}) => {
 
     const {currency,wishlist,toggleWishlist}= useContext(ShopContext);
 
-    const isWishlisted = wishlist.some(
-    (item) => item.product._id === id
+   const isWishlisted = wishlist.some(
+    (item) => item.product && item.product._id === id
 );
-
   return (
     <Link className=' text-gray-500 cursor-pointer' to={`/product/${id}`}>
        <div className="relative overflow-hidden">

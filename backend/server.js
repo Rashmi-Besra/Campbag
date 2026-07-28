@@ -11,6 +11,9 @@ import orderRoute from './Route/orderRoute.js'
 import sellerRoute from "./Route/sellerRoute.js";
 import reviewRoute from "./Route/reviewRoute.js";
 
+import sellerProfileRoute from "./Route/sellerProfileRoute.js";
+
+
 //App config
 const app=express()
 const port=process.env.PORT || 4000
@@ -35,4 +38,5 @@ app.use(
     "/api/reviews",
     reviewRoute
 );
+app.use("/api/sellerprofile", sellerProfileRoute);
 app.listen(port,()=>console.log('server started on PORT :'+ port))

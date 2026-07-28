@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSellerProducts } from "../services/sellerService";
+import { getSellerProducts,deleteProduct } from "../services/sellerService";
 import ProductTable from "../components/seller/ProductTable";
 import LoadingSpinner from "../components/seller/LoadingSpinner";
 import EmptyState from "../components/seller/EmptyState";
@@ -72,7 +72,7 @@ const SellerProducts = () => {
       {products.length === 0 ? (
         <EmptyState />
       ) : (
-        <ProductTable products={products} />
+        <ProductTable products={products} onDelete={handleDelete} />
       )}
     </div>
   );

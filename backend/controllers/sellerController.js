@@ -49,6 +49,10 @@ export const getSellerProducts = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
+     console.log("========== CREATE PRODUCT ==========");
+    console.log(req.body);
+    console.log("subCategory:", req.body.subCategory);
+    console.log("files:", req.files);
     try {
         const product = await createProductService(
             req.user._id,
@@ -61,7 +65,12 @@ export const createProduct = async (req, res) => {
             message: "Product created successfully",
             product,
         });
+
     } catch (error) {
+
+        console.error("Create Product Error:");
+        console.error(error);
+
         return res.status(500).json({
             success: false,
             message: error.message,

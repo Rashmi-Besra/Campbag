@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Product = new mongoose.Schema(
+const ProductSchema = new mongoose.Schema(
   {
     // ========================
     // Basic Information
@@ -24,6 +24,11 @@ const Product = new mongoose.Schema(
     // ========================
     // Seller Information
     // ========================
+    sellername:{
+       type: String,
+      required: true,
+      trim: true,
+    },
 
     seller: {
       type: mongoose.Schema.Types.ObjectId,
@@ -223,8 +228,8 @@ soldCount: {
   }
 );
 
-const Products =
+const Product =
   mongoose.models.Product ||
-  mongoose.model("Product", Product);
+  mongoose.model("Product", ProductSchema);
 
-export default Products;
+export default Product;
