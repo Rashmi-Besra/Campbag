@@ -1,20 +1,28 @@
 import api from "../api/api";
 
+// Dashboard
 export const getDashboard = async () => {
     const response = await api.get("/seller/dashboard");
     return response.data;
 };
 
-export const getSellerProducts = async () => {
-    const response = await api.get("/seller/products");
+
+// Get seller's products
+export const getMyProducts = async () => {
+
+    const response = await api.get(
+        "/product/my-products"
+    );
+
     return response.data;
 };
 
 
+// Create product
 export const createProduct = async (formData) => {
 
     const response = await api.post(
-        "/seller/product",
+        "/product/add",
         formData,
         {
             headers: {
@@ -24,29 +32,25 @@ export const createProduct = async (formData) => {
     );
 
     return response.data;
-
 };
 
-export const deleteProduct = async (id) => {
-  const response = await api.delete(
-    `/seller/product/${id}`
-  );
 
-  return response.data;
-};
-
+// Get single seller product
 export const getSellerProductById = async (id) => {
 
-    const response = await api.get(`/seller/product/${id}`);
+    const response = await api.get(
+        `/product/${id}`
+    );
 
     return response.data;
-
 };
 
+
+// Update product
 export const updateProduct = async (id, formData) => {
 
     const response = await api.put(
-        `/seller/product/${id}`,
+        `/product/${id}`,
         formData,
         {
             headers: {
@@ -56,33 +60,15 @@ export const updateProduct = async (id, formData) => {
     );
 
     return response.data;
-
 };
 
-export const getSellerOrders = async () => {
 
-    const response = await api.get("/seller/orders");
+// Delete product
+export const deleteProduct = async (id) => {
 
-    return response.data;
-
-};
-
-export const updateOrderStatus = async (
-
-    id,
-
-    status
-
-) => {
-
-    const response = await api.patch(
-
-        `/seller/order/${id}/status`,
-
-        { status }
-
+    const response = await api.delete(
+        `/product/${id}`
     );
 
     return response.data;
-
 };

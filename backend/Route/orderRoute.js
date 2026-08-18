@@ -2,14 +2,47 @@ import express from "express";
 import auth from "../middleware/auth.js";
 
 import {
-    placeOrder,
-    getOrders,
+    createOrder,
+    getMyOrders,
+    getSingleOrder,
+    cancelOrder,
+    getSellerOrders,
+    updateOrderStatus,
 } from "../controllers/orderController.js";
 
-const orderRoute = express.Router();
+const router = express.Router();
 
-orderRoute.post("/place", auth, placeOrder);
+router.post(
+    "/",
+    auth,
+    createOrder
+);
 
-orderRoute.get("/", auth, getOrders);
+router.get(
+    "/",
+    auth,
+    getMyOrders
+);
+router.get(
+    "/seller",
+    auth,
+    getSellerOrders
+);
+router.get(
+    "/:id",
+    auth,
+    getSingleOrder
+);
 
-export default orderRoute;
+router.patch(
+    "/:id/cancel",
+    auth,
+    cancelOrder
+);
+router.patch(
+    "/:id/status",
+    auth,
+    updateOrderStatus
+);
+
+export default router;

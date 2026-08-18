@@ -10,7 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    collegeEmail: "",
+    Email: "",
     password: "",
   });
 
@@ -28,21 +28,35 @@ const Login = () => {
       setLoading(true);
 
       const response = await loginUser(formData);
+       console.log("LOGIN RESPONSE:", response);
+    console.log("TOKEN RECEIVED:", response.token);
+if (response.success) {
 
-      if (response.success) {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
-        setToken(response.token);
-        setUser(response.user);
-        toast.success(response.message);
+   
 
-        navigate("/");
-      }
+    localStorage.setItem("token", response.token);
+    localStorage.setItem(
+        "user",
+        JSON.stringify(response.user)
+    );
+
+    toast.success(response.message);
+
+    navigate("/");
+}
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login Failed"
-      );
-    } finally {
+
+    console.log("LOGIN ERROR:", error);
+    console.log("LOGIN STATUS:", error.response?.status);
+    console.log("LOGIN DATA:", error.response?.data);
+
+    toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Login Failed"
+    );
+}
+    finally {
       setLoading(false);
     }
   };
@@ -60,9 +74,9 @@ const Login = () => {
       <input
         className="w-full px-3 py-2 border border-gray-800"
         type="email"
-        name="collegeEmail"
-        placeholder="College Email"
-        value={formData.collegeEmail}
+        name="Email"
+        placeholder="Email"
+        value={formData.Email}
         onChange={handleChange}
         required
       />

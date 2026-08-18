@@ -7,11 +7,11 @@ const userSchema = new mongoose.Schema(
     // =========================
     name: {
       type: String,
-      required: true,
+      default:"",
       trim: true,
     },
 
-    collegeEmail: {
+    Email: {
       type: String,
       required: true,
       unique: true,
@@ -28,7 +28,8 @@ const userSchema = new mongoose.Schema(
 
     registrationNumber: {
       type: String,
-      default: "",
+      required:true,
+      unique:true,
       trim: true,
     },
 

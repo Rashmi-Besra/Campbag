@@ -40,7 +40,9 @@ import AddProduct from './pages/AddProduct'
 import SellerOrders from "./pages/SellerOrders";
 import EditProduct from "./pages/EditProduct";
 import SellerProfile from './pages/SellerProfile';
-
+import PersonalInformation from "./pages/PersonalInformation";
+import AccountSettings from "./pages/AccountSettings";
+import DeleteAccount from "./pages/DeleteAccount";
 
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -64,9 +66,13 @@ const App = () => {
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path='/place-order' element={<Placeorder/>}/>
         <Route path='/orders' element={<Orders/>}/>
-        <Route path='/completeprofile' element={<Completeprofile/>}/>
+       
         <Route path='/Profile' element={<Profile/>}/>
          <Route path='/edit-profile' element={<EditProfile/>}/>
+         <Route
+  path="/personal-info"
+  element={<PersonalInformation />}
+/>
          <Route path="/wishlist" element={<Wishlist />} />
          <Route path="/seller" element={<SellerDashboard />} />
 
@@ -82,6 +88,18 @@ const App = () => {
 <Route
     path="/seller/:sellerId"
     element={<SellerProfile />}
+/>
+<Route
+    path="/complete-profile"
+    element={<Completeprofile />}
+/>
+<Route
+    path="/account-settings"
+    element={<AccountSettings />}
+/>
+<Route
+  path="/delete-account"
+  element={<DeleteAccount />}
 />
 
       </Routes>

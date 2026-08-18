@@ -9,7 +9,7 @@ const VerifyOTP = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const collegeEmail = location.state?.collegeEmail || "";
+  const Email = location.state?.Email || "";
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,9 +26,12 @@ const VerifyOTP = () => {
     try {
 
       setLoading(true);
-
+      console.log("OTP DATA BEING SENT:", {
+    Email,
+    otp,
+});
       const response = await verifyOTP({
-        collegeEmail,
+        Email,
         otp,
       });
 
@@ -41,7 +44,9 @@ const VerifyOTP = () => {
       }
 
     } catch (error) {
-
+      console.log("VERIFY OTP ERROR:", error);
+    console.log("STATUS:", error.response?.status);
+    console.log("DATA:", error.response?.data);
       toast.error(
         error.response?.data?.message || "OTP Verification Failed"
       );
@@ -72,7 +77,7 @@ const VerifyOTP = () => {
         </p>
 
         <p className="text-center font-medium">
-          {collegeEmail}
+          {Email}
         </p>
 
         <input

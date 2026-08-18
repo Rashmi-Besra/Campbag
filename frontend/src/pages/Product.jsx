@@ -349,7 +349,10 @@ console.log("Logged in user:", JSON.stringify(user, null, 2));
         </div>
         <div>
           <div>Contact</div>
-          <p>{productData.seller.name}</p>
+          
+          <p>{productData.seller
+    ? productData.seller.name
+    : "Unknown Seller"}</p>
         </div>
         
       </div>

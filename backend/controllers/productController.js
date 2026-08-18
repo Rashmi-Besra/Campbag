@@ -1,6 +1,7 @@
 import Products from "../models/Product.js";
 import { v2 as cloudinary } from "cloudinary";
 import { addProductSchema } from "../validators/productValidator.js";
+import User from "../models/User.js";
 
 const addProduct = async (req, res) => {
   try {
@@ -24,6 +25,8 @@ const addProduct = async (req, res) => {
       subCategory,
       quantity,
       condition,
+      branch,
+      semester,
       
     } = result.data;
 
@@ -73,6 +76,8 @@ for (const file of req.files) {
   quantity,
 
   condition,
+  branch,
+  semester,
 
   seller:req.user._id,
 
@@ -231,7 +236,9 @@ const updateProduct = async (req, res) => {
       "subCategory",
       "quantity",
       "condition",
-      "status"
+      "status",
+      "branch",
+      "semester"
     ];
 
     allowedFields.forEach(field => {

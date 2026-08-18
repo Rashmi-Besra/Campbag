@@ -5,7 +5,7 @@ import LoadingSpinner from "../components/Seller/LoadingSpinner";
 import EmptyState from "../components/Seller/EmptyState";
 import OrderTable from "../components/Seller/OrderTable";
 
-import { getSellerOrders } from "../services/sellerService";
+import { getSellerOrders,updateOrderStatus } from "../services/orderService";
 
 const SellerOrders = () => {
 
@@ -13,27 +13,61 @@ const SellerOrders = () => {
 
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    
+const fetchOrders = async () => {
 
-        const fetchOrders = async () => {
+    try {
 
-            try {
+        const data = await getSellerOrders();
 
-                const data = await getSellerOrders();
+        setOrders(data.orders);
 
-                setOrders(data.orders);
+    } catch (error) {
 
-            } catch (error) {
+        toast.error("Failed to load orders");
 
-                toast.error("Failed to load orders");
+    } finally {
 
-            } finally {
+        setLoading(false);
 
-                setLoading(false);
+    }
 
-            }
+};
 
-        };
+      
+
+        const handleStatusChange = async (
+    orderId,
+    status
+) => {
+
+    try {
+
+        const response = await updateOrderStatus(
+            orderId,
+            status
+        );
+
+        if (response.success) {
+
+            toast.success(response.message);
+
+            fetchOrders();
+
+        }
+
+    } catch (error) {
+
+        toast.error(
+            error.response?.data?.message ||
+            "Failed to update order."
+        );
+
+    }
+
+};
+
+     useEffect(() => {
 
         fetchOrders();
 
@@ -52,7 +86,10 @@ const SellerOrders = () => {
                 Seller Orders
             </h1>
 
-            <OrderTable orders={orders} />
+           <OrderTable
+    orders={orders}
+    handleStatusChange={handleStatusChange}
+/>
 
         </div>
 

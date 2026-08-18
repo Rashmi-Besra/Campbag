@@ -22,9 +22,9 @@ import {
 
 import {
     getDashboard as getSellerDashboard,
-    getSellerOrders as getSellerOrdersAPI,
-    updateOrderStatus as updateOrderItemStatusAPI,
-    getSellerProducts as getMyProductsAPI,
+    
+   
+    
     deleteProduct as deleteProductAPI
 } from "../services/sellerService";
 
@@ -167,6 +167,23 @@ const placeOrder = async (orderData) => {
 
 };
     
+const filteredProducts = products.filter((product) => {
+    const searchTerm = search.trim().toLowerCase();
+
+    if (!searchTerm) {
+        return true;
+    }
+
+    return (
+        product.name?.toLowerCase().includes(searchTerm) ||
+        product.category?.toLowerCase().includes(searchTerm) ||
+        product.subCategory?.toLowerCase().includes(searchTerm) ||
+        product.description?.toLowerCase().includes(searchTerm) ||
+        product.branch?.toLowerCase().includes(searchTerm)
+    );
+});
+
+
 
 
  const fetchProducts = async () => {
@@ -344,6 +361,8 @@ const fetchMyProducts = async () => {
         );
     }
 };
+
+
 
 const deleteMyProduct = async (productId) => {
     try {

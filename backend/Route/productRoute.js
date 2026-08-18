@@ -23,6 +23,7 @@ productRoute.get("/:id", getSingleProduct);
 productRoute.put(
   "/:id",
   auth,
+  upload.array("images",4),
   updateProduct
 );
 

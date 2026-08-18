@@ -25,6 +25,7 @@ const userRegister = async (req, res) => {
     if (!result.success) {
       return res.status(400).json({
         success: false,
+        message:"Validation failed",
         errors: result.error.issues,
       });
     }
@@ -32,20 +33,13 @@ const userRegister = async (req, res) => {
     const {
       name,
       registrationNumber,
-      collegeEmail,
+      Email,
       password,
     } = result.data;
 
-    // Only NIT Jamshedpur Emails
-    if (!collegeEmail.endsWith("@nitjsr.ac.in")) {
-      return res.status(400).json({
-        success: false,
-        message: "Only NIT Jamshedpur college emails are allowed.",
-      });
-    }
-
+ 
     // Existing User
-    const existingUser = await User.findOne({ collegeEmail });
+    const existingUser = await User.findOne({ Email });
 
     if (existingUser) {
       return res.status(400).json({
@@ -73,13 +67,13 @@ const userRegister = async (req, res) => {
     const user = await User.create({
       name,
       registrationNumber,
-      collegeEmail,
+      Email,
       password: hashedPassword,
     });
 
     // Remove previous OTP (if any)
     await OTP.deleteMany({
-      email: collegeEmail,
+      Email: Email,
       purpose: "VERIFY_EMAIL",
     });
 
@@ -89,14 +83,14 @@ const userRegister = async (req, res) => {
     // Save OTP
     await OTP.create({
       user: user._id,
-      email: collegeEmail,
+      Email: Email,
       otp,
       purpose: "VERIFY_EMAIL",
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     // Send OTP Email
-    await sendOTPEmail(collegeEmail, otp);
+    await sendOTPEmail(Email, otp);
 
     return res.status(201).json({
       success: true,
@@ -136,10 +130,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const { collegeEmail, password } = result.data;
+    const { Email, password } = result.data;
 
     // Find user
-    const user = await User.findOne({ collegeEmail });
+    const user = await User.findOne({ Email });
 
     if (!user) {
       return res.status(404).json({
@@ -181,7 +175,7 @@ const loginUser = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        collegeEmail: user.collegeEmail,
+        Email: user.Email,
         role: user.role,
         profileCompleted: user.profileCompleted,
         profileImage: user.profileImage,
@@ -205,19 +199,22 @@ const loginUser = async (req, res) => {
 const verifyOTP = async (req, res) => {
   try {
     // Validate request
+    console.log("OTP REQUEST BODY:", req.body);
+
     const result = verifyOtpSchema.safeParse(req.body);
 
     if (!result.success) {
+      console.log("OTP VALIDATION ERROR:", result.error.issues);
       return res.status(400).json({
         success: false,
         errors: result.error.issues,
       });
     }
 
-    const { collegeEmail, otp } = result.data;
+    const { Email, otp } = result.data;
 
     // Find user
-    const user = await User.findOne({ collegeEmail });
+    const user = await User.findOne({ Email });
 
     if (!user) {
       return res.status(404).json({
@@ -236,7 +233,7 @@ const verifyOTP = async (req, res) => {
 
     // Find OTP
     const otpRecord = await OTP.findOne({
-      email: collegeEmail,
+      Email: Email,
       purpose: "VERIFY_EMAIL",
     });
 
@@ -284,12 +281,223 @@ const verifyOTP = async (req, res) => {
 // ==============================
 // Admin Login
 // ==============================
+// ==============================
+// Get Current User Profile
+// ==============================
 
+const getMyProfile = async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user._id).select("-password");
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user,
+        });
+
+    } catch (error) {
+
+        console.error("Get Profile Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    }
+};
+
+
+// ==============================
+// Complete User Profile
+// ==============================
+
+const completeProfile = async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        const {
+            personalEmail,
+            phoneNumber,
+            branch,
+            semester,
+            hostel
+        } = req.body;
+
+        user.personalEmail = personalEmail || "";
+        user.phoneNumber = phoneNumber || "";
+        user.branch = branch || "";
+        user.semester = semester || 1;
+        user.hostel = hostel || "";
+
+        // Very important
+        user.profileCompleted = true;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile completed successfully.",
+            user: {
+                id: user._id,
+                name: user.name,
+                Email: user.Email,
+                personalEmail: user.personalEmail,
+                registrationNumber: user.registrationNumber,
+                phoneNumber: user.phoneNumber,
+                branch: user.branch,
+                semester: user.semester,
+                hostel: user.hostel,
+                profileImage: user.profileImage,
+                profileCompleted: user.profileCompleted
+            }
+        });
+
+    } catch (error) {
+
+        console.error("Complete Profile Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+const updateMyProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        const {
+            personalEmail,
+            phoneNumber,
+            branch,
+            semester,
+            hostel,
+            profileImage,
+        } = req.body;
+
+        if (personalEmail !== undefined)
+            user.personalEmail = personalEmail;
+
+        if (phoneNumber !== undefined)
+            user.phoneNumber = phoneNumber;
+
+        if (branch !== undefined)
+            user.branch = branch;
+
+        if (semester !== undefined)
+            user.semester = semester;
+
+        if (hostel !== undefined)
+            user.hostel = hostel;
+
+        if (profileImage !== undefined)
+            user.profileImage = profileImage;
+
+        user.profileCompleted = true;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully.",
+            user,
+        });
+
+    } catch (error) {
+        console.error("Update Profile Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required.",
+      });
+    }
+
+    // Find logged-in user
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Verify password
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password.",
+      });
+    }
+
+    // Delete user
+    await User.findByIdAndDelete(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Account deleted successfully.",
+    });
+
+  } catch (error) {
+    console.error("Delete Account Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete account.",
+    });
+  }
+};
 
 
 export {
   userRegister,
   loginUser,
   verifyOTP,
+  getMyProfile,
+  completeProfile,
+  updateMyProfile,
+  deleteAccount,
   
 };

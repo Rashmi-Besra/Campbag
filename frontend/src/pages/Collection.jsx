@@ -119,115 +119,161 @@ const Collection = () => {
   ==========================================
   */
 
-  useEffect(() => {
+ useEffect(() => {
 
-    /*
-    ----------------------------------------
-    STEP 1
-    COPY PRODUCTS
-    ----------------------------------------
-    */
+    // ----------------------------------------
+    // STEP 1
+    // COPY PRODUCTS
+    // ----------------------------------------
 
-    let productsCopy = [...products]
+    let productsCopy = [...products];
 
-console.log("URL Category:", category)
-console.log("URL SubCategory:", subCategory)
-
-console.log(
-  products.map(product => ({
-    category: product.category,
-    subCategory: product.subCategory
-  }))
-)
-    /*
-    ----------------------------------------
-    STEP 2
-    FILTER CATEGORY + SUBCATEGORY
-    ----------------------------------------
-    */
-
-  if (category) {
-  productsCopy = productsCopy.filter(
-    product =>
-      product.category?.toLowerCase().trim() === category.toLowerCase().trim()
-  );
-}
-
-if (subCategory) {
-  productsCopy = productsCopy.filter(
-    product =>
-      product.subCategory?.toLowerCase().trim() === subCategory.toLowerCase().trim()
-  );
-}
+    console.log("URL Category:", category);
+    console.log("URL SubCategory:", subCategory);
+    console.log("Search:", search);
 
 
-    /*
-    ----------------------------------------
-    STEP 3
-    FILTER COLORS
-    ----------------------------------------
-    */
+    // ----------------------------------------
+    // STEP 2
+    // FILTER CATEGORY + SUBCATEGORY
+    // ----------------------------------------
 
-    if (selectedColors.length > 0) {
+    if (category) {
 
-      productsCopy = productsCopy.filter(product =>
+        productsCopy = productsCopy.filter(
+            (product) =>
+                product.category?.toLowerCase().trim() ===
+                category.toLowerCase().trim()
+        );
 
-        selectedColors.includes(
-          product.color.toLowerCase()
-        )
+    }
 
-      )
+    if (subCategory) {
+
+        productsCopy = productsCopy.filter(
+            (product) =>
+                product.subCategory?.toLowerCase().trim() ===
+                subCategory.toLowerCase().trim()
+        );
 
     }
 
 
+// ----------------------------------------
+// STEP 3
+// SEARCH FILTER
+// ----------------------------------------
 
-    /*
-    ----------------------------------------
-    STEP 4
-    SORT PRODUCTS
-    ----------------------------------------
-    */
+if (search.trim() !== "") {
+
+    const searchWords = search
+        .toLowerCase()
+        .trim()
+        .split(/\s+/);
+
+    productsCopy = productsCopy
+        .filter((product) => {
+
+            const searchableText = [
+                product.name,
+                product.category,
+                product.subCategory,
+                product.description,
+                product.branch,
+                product.condition
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            // Every word typed by the user
+            // must exist somewhere in the product information
+            return searchWords.every((word) =>
+                searchableText.includes(word)
+            );
+
+        })
+        .sort((a, b) => {
+
+            const aName = a.name?.toLowerCase() || "";
+            const bName = b.name?.toLowerCase() || "";
+
+            const searchText = search.toLowerCase().trim();
+
+            // Exact product name first
+            if (aName === searchText) return -1;
+            if (bName === searchText) return 1;
+
+            // Product name starting with search first
+            if (aName.startsWith(searchText)) return -1;
+            if (bName.startsWith(searchText)) return 1;
+
+            // Product name containing search
+            if (aName.includes(searchText)) return -1;
+            if (bName.includes(searchText)) return 1;
+
+            return 0;
+        });
+}
+
+
+    // ----------------------------------------
+    // STEP 4
+    // FILTER COLORS
+    // ----------------------------------------
+
+    if (selectedColors.length > 0) {
+
+        productsCopy = productsCopy.filter((product) => {
+
+            return product.color &&
+                selectedColors.includes(
+                    product.color.toLowerCase()
+                );
+
+        });
+
+    }
+
+
+    // ----------------------------------------
+    // STEP 5
+    // SORT PRODUCTS
+    // ----------------------------------------
 
     if (sortType === "Low-High") {
 
-      productsCopy.sort(
-        (a, b) => a.price - b.price
-      )
+        productsCopy.sort(
+            (a, b) => a.price - b.price
+        );
 
     }
 
     else if (sortType === "High-Low") {
 
-      productsCopy.sort(
-        (a, b) => b.price - a.price
-      )
+        productsCopy.sort(
+            (a, b) => b.price - a.price
+        );
 
     }
 
 
+    // ----------------------------------------
+    // STEP 6
+    // UPDATE FINAL PRODUCTS
+    // ----------------------------------------
 
-    /*
-    ----------------------------------------
-    STEP 5
-    UPDATE FINAL PRODUCTS
-    ----------------------------------------
-    */
+    setFilteredProducts(productsCopy);
 
-    setFilteredProducts(productsCopy)
-
-  },
-
-    [
-      products,
-      category,
-      subCategory,
-      selectedColors,
-      sortType
-    ]
-
-  )
-
+}, [
+    products,
+    category,
+    subCategory,
+    selectedColors,
+    sortType,
+    search,
+    showSearch
+]);
 
 
   return (

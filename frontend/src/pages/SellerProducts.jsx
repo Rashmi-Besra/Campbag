@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSellerProducts,deleteProduct } from "../services/sellerService";
+import { getMyProducts,deleteProduct } from "../services/sellerService";
 import ProductTable from "../components/seller/ProductTable";
 import LoadingSpinner from "../components/seller/LoadingSpinner";
 import EmptyState from "../components/seller/EmptyState";

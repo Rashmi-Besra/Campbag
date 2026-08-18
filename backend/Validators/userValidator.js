@@ -12,7 +12,7 @@ export const registerSchema = z
       .trim()
       .min(5, "Registration Number is required"),
 
-    collegeEmail: z
+    Email: z
       .string()
       .trim()
       .email("Invalid email address"),
@@ -36,15 +36,15 @@ export const registerSchema = z
   });
 
 export const verifyOtpSchema = z.object({
-  collegeEmail: z.string().email("Invalid email address"),
+  Email: z.string().email("Invalid email address"),
 
   otp: z
     .string()
-    .length(6, "OTP must be exactly 6 digits"),
+    .length(/^\d{6}$/, "OTP must be exactly 6 digits"),
 });
 
 export const loginSchema = z.object({
-  collegeEmail: z.string().email("Invalid email address"),
+  Email: z.string().email("Invalid email address"),
 
   password: z.string().min(1, "Password is required"),
 });

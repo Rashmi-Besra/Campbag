@@ -12,6 +12,7 @@ import sellerRoute from "./Route/sellerRoute.js";
 import reviewRoute from "./Route/reviewRoute.js";
 
 import sellerProfileRoute from "./Route/sellerProfileRoute.js";
+import profileRoute from "./Route/profileRoute.js";
 
 
 //App config
@@ -28,6 +29,7 @@ app.use(cors())
 app.use('/api/user',userRoute)
 app.use("/api/product", productRoute);
 app.use("/api/wishlist", wishlistRoute);
+app.use("/api/profile", profileRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/order", orderRoute);
 app.use("/api/seller", sellerRoute);

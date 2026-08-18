@@ -10,12 +10,13 @@ const otpSchema = new mongoose.Schema(
     },
 
     // Email
-    email: {
+    Email: {
       type: String,
       required: true,
       lowercase: true,
       trim: true,
     },
+    
 
     // OTP
     otp: {

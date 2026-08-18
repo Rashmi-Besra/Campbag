@@ -1,261 +1,344 @@
-import React, { useState } from "react";
-import { FiArrowLeft, FiCamera } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+import { getMyProfile, updateMyProfile } from "../services/profileService";
 
 const EditProfile = () => {
 
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        name: "Rashmi Besra",
+    useEffect(() => {
 
-        phone: "9876543210",
+        const fetchProfile = async () => {
 
-        personalEmail: "rashmi@gmail.com",
+            try {
 
-        collegeEmail: "2023ugcs001@nitjsr.ac.in",
+                const response = await getMyProfile();
 
-        registrationNumber: "2023UGCS001",
+                if (response.success) {
+                    setProfile(response.user);
+                }
 
-        branch: "Computer Science & Engineering",
+            } catch (error) {
 
-        semester: 5,
+                console.log(error);
 
-        hostel: "Hostel B",
+                toast.error(
+                    error.response?.data?.message ||
+                    "Failed to load profile"
+                );
 
-        profileImage: ""
+            } finally {
 
-    });
+                setLoading(false);
+
+            }
+        };
+
+        fetchProfile();
+
+    }, []);
+
 
     const handleChange = (e) => {
 
         const { name, value } = e.target;
 
-        setFormData((prev) => ({
+        setProfile((prev) => ({
             ...prev,
             [name]: value
         }));
-
     };
 
-    const handleSubmit = (e) => {
+
+    const handleSave = async (e) => {
 
         e.preventDefault();
 
-        console.log(formData);
+        try {
 
-        // Backend API Later
+            const response = await updateMyProfile({
+                personalEmail: profile.personalEmail,
+                phoneNumber: profile.phoneNumber,
+                branch: profile.branch,
+                semester: profile.semester,
+                hostel: profile.hostel
+            });
 
+            if (response.success) {
+
+                toast.success("Profile updated successfully");
+
+                navigate("/personal-info");
+
+            }
+
+        } catch (error) {
+
+            console.log(error);
+
+            toast.error(
+                error.response?.data?.message ||
+                "Failed to update profile"
+            );
+
+        }
     };
+
+
+    if (loading) {
+        return (
+            <div className="text-center py-20">
+                Loading profile...
+            </div>
+        );
+    }
+
+
+    if (!profile) {
+        return (
+            <div className="text-center py-20">
+                Profile not found.
+            </div>
+        );
+    }
+
 
     return (
 
-        <div className="border-t pt-14 min-h-screen bg-gray-50">
+        <div className="max-w-5xl mx-auto px-4 py-8">
 
-            <div className="max-w-3xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-semibold">
+                Edit Profile
+            </h1>
 
-                {/* Back */}
+            <p className="text-gray-500 mt-2">
+                Update your personal and academic information.
+            </p>
 
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-indigo-600 mb-6 hover:text-indigo-700"
-                >
 
-                    <FiArrowLeft />
+            <form
+                onSubmit={handleSave}
+                className="mt-8 bg-white rounded-xl shadow p-6"
+            >
 
-                    Back
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                </button>
+                    {/* Name */}
 
-                {/* Card */}
+                    <div>
 
-                <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+                        <label className="block text-sm font-medium mb-2">
+                            Full Name
+                        </label>
 
-                    <h1 className="text-3xl font-bold text-gray-800">
-
-                        Edit Profile
-
-                    </h1>
-
-                    <p className="text-gray-500 mt-2">
-
-                        Update your personal and academic information.
-
-                    </p>
-
-                    {/* Profile Image */}
-
-                    <div className="flex flex-col items-center mt-8">
-
-                        <div className="w-28 h-28 rounded-full bg-indigo-100 flex items-center justify-center">
-
-                            <FiCamera className="text-4xl text-indigo-600" />
-
-                        </div>
-
-                        <button className="mt-4 text-indigo-600 hover:text-indigo-700">
-
-                            Change Photo
-
-                        </button>
+                        <input
+                            type="text"
+                            value={profile.name || ""}
+                            disabled
+                            className="w-full border rounded-lg px-4 py-3 bg-gray-100"
+                        />
 
                     </div>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="mt-8 space-y-8"
-                    >
 
-                        {/* Personal Information */}
+                    {/* College Email */}
 
-                        <div>
+                    <div>
 
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                        <label className="block text-sm font-medium mb-2">
+                            College Email
+                        </label>
 
-                                Personal Information
+                        <input
+                            type="email"
+                            value={profile.collegeEmail || ""}
+                            disabled
+                            className="w-full border rounded-lg px-4 py-3 bg-gray-100"
+                        />
 
-                            </h2>
+                    </div>
 
-                            <div className="grid md:grid-cols-2 gap-5">
 
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    placeholder="Full Name"
-                                    className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                />
+                    {/* Registration Number */}
 
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    placeholder="Phone Number"
-                                    className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                />
+                    <div>
 
-                                <input
-                                    type="email"
-                                    name="personalEmail"
-                                    value={formData.personalEmail}
-                                    onChange={handleChange}
-                                    placeholder="Personal Email"
-                                    className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none md:col-span-2"
-                                />
+                        <label className="block text-sm font-medium mb-2">
+                            Registration Number
+                        </label>
 
-                            </div>
+                        <input
+                            type="text"
+                            value={profile.registrationNumber || ""}
+                            disabled
+                            className="w-full border rounded-lg px-4 py-3 bg-gray-100"
+                        />
 
-                        </div>
+                    </div>
 
-                        {/* Academic Information */}
 
-                        <div>
+                    {/* Personal Email */}
 
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    <div>
 
-                                Academic Information
+                        <label className="block text-sm font-medium mb-2">
+                            Personal Email
+                        </label>
 
-                            </h2>
+                        <input
+                            type="email"
+                            name="personalEmail"
+                            value={profile.personalEmail || ""}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg px-4 py-3"
+                        />
 
-                            <div className="grid md:grid-cols-2 gap-5">
+                    </div>
 
-                                <input
-                                    value={formData.collegeEmail}
-                                    disabled
-                                    className="border rounded-lg px-4 py-3 bg-gray-100"
-                                />
 
-                                <input
-                                    value={formData.registrationNumber}
-                                    disabled
-                                    className="border rounded-lg px-4 py-3 bg-gray-100"
-                                />
+                    {/* Phone */}
 
-                                 <select defaultValue={formData.branch} className='w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:rinf-indigo-500 focus:outline-none'>
+                    <div>
 
-          <option value="">Select Branch</option>
-          <option value="CSE">Computer Science and Engineering</option>
-          <option value="ECE">Electronics & communication</option>
-          <option value="EE">Electrical Engineering</option>
-          <option value="ME">Mechanical Engineering</option>
-          <option value="CE">Civil Engineeing</option>
-          <option value="MME">Material and Metallurgical Engineering</option>
-          <option value="PIE">Production and Industrial Engineering</option>
-          <option value="ECM">Electronics and computer engineering</option>
-         </select>
-                                <select
-                                    name="semester"
-                                    value={formData.semester}
-                                    onChange={handleChange}
-                                    className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                >
+                        <label className="block text-sm font-medium mb-2">
+                            Phone Number
+                        </label>
 
-                                    {[1,2,3,4,5,6,7,8].map((sem) => (
+                        <input
+                            type="text"
+                            name="phoneNumber"
+                            value={profile.phoneNumber || ""}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg px-4 py-3"
+                        />
 
-                                        <option
-                                            key={sem}
-                                            value={sem}
-                                        >
+                    </div>
 
-                                            {sem}
 
-                                        </option>
+                    {/* Branch */}
 
-                                    ))}
+                    <div>
 
-                                </select>
+                        <label className="block text-sm font-medium mb-2">
+                            Branch
+                        </label>
 
-                                <input
-                                    type="text"
-                                    name="hostel"
-                                    value={formData.hostel}
-                                    onChange={handleChange}
-                                    placeholder="Hostel"
-                                    className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none md:col-span-2"
-                                />
+                        <select
+                            name="branch"
+                            value={profile.branch || ""}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg px-4 py-3"
+                        >
 
-                            </div>
+                            <option value="">Select Branch</option>
+                            <option value="CSE">
+                                Computer Science and Engineering
+                            </option>
+                            <option value="ECE">
+                                Electronics & Communication
+                            </option>
+                            <option value="EE">
+                                Electrical Engineering
+                            </option>
+                            <option value="ME">
+                                Mechanical Engineering
+                            </option>
+                            <option value="CE">
+                                Civil Engineering
+                            </option>
+                            <option value="MME">
+                                Material and Metallurgical Engineering
+                            </option>
+                            <option value="PIE">
+                                Production and Industrial Engineering
+                            </option>
+                            <option value="ECM">
+                                Electronics and Computer Engineering
+                            </option>
 
-                        </div>
+                        </select>
 
-                        {/* Buttons */}
+                    </div>
 
-                        <div className="flex justify-end gap-4">
 
-                            <button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                className="px-6 py-3 border rounded-lg hover:bg-gray-100"
-                            >
+                    {/* Semester */}
 
-                                Cancel
+                    <div>
 
-                            </button>
+                        <label className="block text-sm font-medium mb-2">
+                            Semester
+                        </label>
 
-                            <button
-                                type="submit"
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg"
-                            >
+                        <select
+                            name="semester"
+                            value={profile.semester || ""}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg px-4 py-3"
+                        >
 
-                                Save Changes
+                            <option value="">Select Semester</option>
 
-                            </button>
+                            {[1,2,3,4,5,6,7,8].map((sem) => (
+                                <option key={sem} value={sem}>
+                                    {sem}
+                                </option>
+                            ))}
 
-                        </div>
+                        </select>
 
-                    </form>
+                    </div>
+
+
+                    {/* Hostel */}
+
+                    <div>
+
+                        <label className="block text-sm font-medium mb-2">
+                            Hostel
+                        </label>
+
+                        <input
+                            type="text"
+                            name="hostel"
+                            value={profile.hostel || ""}
+                            onChange={handleChange}
+                            className="w-full border rounded-lg px-4 py-3"
+                        />
+
+                    </div>
 
                 </div>
 
-            </div>
+
+                <div className="flex justify-end gap-4 mt-8">
+
+                    <button
+                        type="button"
+                        onClick={() => navigate("/Profile")}
+                        className="px-6 py-3 border rounded-lg"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        onClick={() => navigate("/personal-info")}
+                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    >
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
-
     );
-
 };
 
 export default EditProfile;

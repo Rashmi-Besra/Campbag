@@ -24,11 +24,7 @@ const ProductSchema = new mongoose.Schema(
     // ========================
     // Seller Information
     // ========================
-    sellername:{
-       type: String,
-      required: true,
-      trim: true,
-    },
+   
 
     seller: {
       type: mongoose.Schema.Types.ObjectId,
@@ -108,6 +104,7 @@ const ProductSchema = new mongoose.Schema(
     // ========================
     quantity: {
       type: Number,
+      min:1,
       default: 1,
     },
 

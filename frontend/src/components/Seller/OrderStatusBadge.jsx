@@ -4,15 +4,19 @@ const OrderStatusBadge = ({ status }) => {
 
     switch (status) {
 
-        case "Pending":
+        case "Placed":
             styles = "bg-yellow-100 text-yellow-700";
             break;
 
-        case "Confirmed":
+        case "Accepted":
             styles = "bg-blue-100 text-blue-700";
             break;
 
-        case "Shipped":
+        case "Packed":
+            styles = "bg-indigo-100 text-indigo-700";
+            break;
+
+        case "Out for Delivery":
             styles = "bg-purple-100 text-purple-700";
             break;
 

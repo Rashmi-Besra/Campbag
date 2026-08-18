@@ -22,6 +22,7 @@ const ProductForm = ({
 
   const [formData, setFormData] = useState(defaultFormData);
   const [images, setImages] = useState([]);
+  const [removedImages, setRemovedImages] = useState([]);
 
   useEffect(() => {
     if (Object.keys(initialData).length > 0) {
@@ -32,9 +33,11 @@ const ProductForm = ({
 
       // If editing an existing product,
       // show existing image URLs
-      if (initialData.image) {
-        setImages(initialData.image);
-      }
+    if (initialData.images) {
+    setImages(
+        initialData.images
+    );
+}
     }
   }, [initialData]);
 
@@ -56,12 +59,15 @@ const ProductForm = ({
       data.append(key, formData[key]);
     });
 
-    images.forEach((image) => {
-      // Upload only newly selected files
-      if (image instanceof File) {
-        data.append("images", image);
-      }
-    });
+    iimages.forEach((image) => {
+  if (image instanceof File) {
+    data.append("images", image);
+  }
+});
+
+removedImages.forEach((publicId) => {
+  data.append("removedImages", publicId);
+});
     console.log("formData:", formData);
 
 for (const [key, value] of data.entries()) {
@@ -100,9 +106,10 @@ for (const [key, value] of data.entries()) {
         />
 
         <ImagePreview
-          images={images}
-          setImages={setImages}
-        />
+  images={images}
+  setImages={setImages}
+  setRemovedImages={setRemovedImages}
+/>
       </div>
 
       {/* Description */}
@@ -211,7 +218,7 @@ for (const [key, value] of data.entries()) {
             <option value="New">New</option>
             <option value="Like New">Like New</option>
             <option value="Good">Good</option>
-            <option value="Fair">Fair</option>
+            <option value="Used">Used</option>
           </select>
         </div>
 

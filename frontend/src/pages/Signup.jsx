@@ -11,7 +11,7 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
     registrationNumber: "",
-    collegeEmail: "",
+    Email: "",
     password: "",
     confirmPassword: "",
   });
@@ -43,7 +43,7 @@ const Signup = () => {
       const response = await registerUser({
         name: formData.name,
         registrationNumber: formData.registrationNumber,
-        collegeEmail: formData.collegeEmail,
+        Email: formData.Email,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       });
@@ -54,7 +54,7 @@ const Signup = () => {
 
         navigate("/verify-otp", {
           state: {
-            collegeEmail: formData.collegeEmail,
+            Email: formData.Email,
           },
         });
 
@@ -113,9 +113,9 @@ toast.error(
 
         <input
           type="email"
-          name="collegeEmail"
-          placeholder="College Email"
-          value={formData.collegeEmail}
+          name="Email"
+          placeholder="Email"
+          value={formData.Email}
           onChange={handleChange}
           required
           className="w-full border px-3 py-2 rounded"

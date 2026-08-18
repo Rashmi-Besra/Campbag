@@ -34,7 +34,8 @@ const auth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error(error);
+    console.error("JWT Error:", error.name);
+    console.error("JWT Message:", error.message);
 
     return res.status(401).json({
       success: false,

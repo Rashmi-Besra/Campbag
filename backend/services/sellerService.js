@@ -76,6 +76,7 @@ export const createProductService = async (
 
     console.log("========== SERVICE ==========");
     console.log(productData);
+    console.log("subCategory:", productData.subCategory);
    const images = [];
 
 if (files && files.length > 0) {
@@ -187,22 +188,24 @@ export const updateSellerProductService = async (
     if (!product) {
         throw new Error("Product not found");
     }
+let images = product.images;
 
-    let imageUrls = product.image;
+if (files && files.length > 0) {
 
-    if (files && files.length > 0) {
+    images = [];
 
-        imageUrls = [];
+    for (const file of files) {
 
-        for (const file of files) {
+        const result = await uploadToCloudinary(file.buffer);
 
-            const result = await uploadToCloudinary(file.buffer);
-
-            imageUrls.push(result.secure_url);
-
-        }
+        images.push({
+            url: result.secure_url,
+            public_id: result.public_id,
+        });
 
     }
+
+}
 
     product.name = productData.name;
     product.description = productData.description;
@@ -213,7 +216,7 @@ export const updateSellerProductService = async (
     product.branch = productData.branch;
     product.semester = productData.semester;
     product.condition = productData.condition;
-    product.image = imageUrls;
+    product.images = images;
 
     await product.save();
 
@@ -228,8 +231,9 @@ export const getSellerOrdersService = async (sellerId) => {
     const orders = await Order.find({
         seller: sellerId,
     })
-    .populate("buyer", "name email")
-    .populate("items.product");
+    .populate("user", "name collegeEmail profileImage")
+    .populate("items.product")
+    .sort({ createdAt: -1 });
 
     return orders;
 
@@ -241,7 +245,7 @@ export const updateOrderStatusService = async (
 
     orderId,
 
-    status
+    newStatus
 
 ) => {
 
@@ -255,11 +259,51 @@ export const updateOrderStatusService = async (
 
     if (!order) {
 
-        throw new Error("Order not found");
+        throw new Error("Order not found.");
 
     }
 
-    order.status = status;
+    if (order.orderStatus === "Cancelled") {
+
+        throw new Error(
+            "Cancelled orders cannot be updated."
+        );
+
+    }
+
+    if (order.orderStatus === "Delivered") {
+
+        throw new Error(
+            "Order already delivered."
+        );
+
+    }
+
+    const allowedTransitions = {
+
+        Placed: ["Accepted"],
+
+        Accepted: ["Packed"],
+
+        Packed: ["Out for Delivery"],
+
+        "Out for Delivery": ["Delivered"],
+
+    };
+
+    if (
+        !allowedTransitions[
+            order.orderStatus
+        ]?.includes(newStatus)
+    ) {
+
+        throw new Error(
+            `Cannot change status from ${order.orderStatus} to ${newStatus}`
+        );
+
+    }
+
+    order.orderStatus = newStatus;
 
     await order.save();
 

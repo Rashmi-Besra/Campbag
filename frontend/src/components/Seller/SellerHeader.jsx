@@ -1,57 +1,62 @@
 import React from "react";
-import { FaCheckCircle } from "react-icons/fa";
 
-const SellerHeader = ({ seller }) => {
+const SellerHeader = ({ profile }) => {
+
+    console.log("SELLER HEADER PROFILE:", profile);
+
     return (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
 
-            <div className="flex flex-col md:flex-row items-center gap-6">
+        <header className="bg-white border-b">
 
-                {/* Profile Image */}
-                <img
-                    src={
-                        seller.profileImage ||
-                        "https://ui-avatars.com/api/?name=" +
-                            encodeURIComponent(seller.name)
-                    }
-                    alt={seller.name}
-                    className="w-28 h-28 rounded-full object-cover border"
-                />
+            <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-                {/* Seller Details */}
-                <div className="flex-1">
+                <div>
 
-                    <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-semibold">
+                        Seller Dashboard
+                    </h1>
 
-                        <h1 className="text-3xl font-bold">
-                            {seller.name}
-                        </h1>
+                    <p className="text-sm text-gray-500">
+                        Manage your store and orders
+                    </p>
 
-                        {seller.sellerVerified && (
-                            <FaCheckCircle
-                                className="text-blue-500"
-                                size={20}
-                            />
-                        )}
+                </div>
+
+
+                <div className="flex items-center gap-3">
+
+                    <div className="text-right">
+
+                        <p className="font-medium">
+                            {profile?.name || "Seller"}
+                        </p>
+
+                        <p className="text-sm text-gray-500">
+                            {profile?.sellerVerified
+                                ? "Verified Seller"
+                                : "Seller"}
+                        </p>
 
                     </div>
 
-                    <p className="text-gray-500 mt-2">
-                        Member since{" "}
-                        {new Date(
-                            seller.createdAt
-                        ).toLocaleDateString("en-US", {
-                            month: "long",
-                            year: "numeric",
-                        })}
-                    </p>
+
+                    <img
+                        src={
+                            profile?.profileImage ||
+                            "https://via.placeholder.com/40"
+                        }
+                        alt="Seller"
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
 
                 </div>
 
             </div>
 
-        </div>
+        </header>
+
     );
+
 };
 
 export default SellerHeader;
