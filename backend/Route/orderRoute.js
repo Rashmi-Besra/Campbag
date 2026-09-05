@@ -8,6 +8,7 @@ import {
     cancelOrder,
     getSellerOrders,
     updateOrderStatus,
+    getSellerSingleOrder,
 } from "../controllers/orderController.js";
 
 const router = express.Router();
@@ -43,6 +44,12 @@ router.patch(
     "/:id/status",
     auth,
     updateOrderStatus
+);
+
+router.get(
+    "/seller/:id",
+    auth,
+    getSellerSingleOrder
 );
 
 export default router;

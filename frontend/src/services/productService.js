@@ -2,7 +2,15 @@ import api from "../api/api";
 
 
 export const getMyProducts = async () => {
-    const response = await api.get("/product/my-products");
+
+    const response = await api.get(
+        "/product/my-products"
+    );
+
+    console.log(
+        "GET MY PRODUCTS API RESPONSE:",
+        response.data
+    );
 
     return response.data;
 };

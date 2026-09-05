@@ -1,31 +1,26 @@
 import React,{useContext} from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
-import { toast } from "react-toastify";
-import { cancelOrder } from "../services/orderService";
+import { useNavigate } from "react-router-dom";
 const Orders = () => {
 
-  const { orders,currency,fetchOrders}=useContext(ShopContext);
+  const { orders,currency,fetchOrders,cancelOrder}=useContext(ShopContext);
   console.log("Orders =", orders);
 console.log("Type =", typeof orders);
-const handleCancel = async (orderId) => {
+const navigate = useNavigate();
+
+const handleCancelOrder = async (orderId) => {
+
 
     try {
 
-        const response = await cancelOrder(orderId);
-
-        if (response.success) {
-
-            toast.success(response.message);
-
-            fetchOrders();
-
-        }
+        await cancelOrder(orderId);
 
     } catch (error) {
 
-        toast.error(
-            error.response?.data?.message
+        console.log(
+            "Failed to cancel order:",
+            error
         );
 
     }
@@ -73,7 +68,14 @@ const handleCancel = async (orderId) => {
                     <p className='text-sm md:text-base'>{order.orderStatus}</p>
                     
                   </div>
-                  <button className='border px-2 py-0.5 text-sm font-medium rounded-sm cursor-pointer '>Track Order</button>
+<button
+    onClick={() =>
+        navigate(`/orders/${order._id}`)
+    }
+    className="border px-2 py-0.5 text-sm font-medium rounded-sm cursor-pointer"
+>
+    Track Order
+</button>
         {order.orderStatus === "Cancelled" ? (
     <button
         disabled

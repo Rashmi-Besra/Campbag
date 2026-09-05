@@ -1,7 +1,5 @@
-import Order from "../models/Order.js";
-import Cart from "../models/Cart.js";
-import Product from "../models/Product.js";
-import { placeOrderSchema } from "../validators/orderValidator.js";
+
+import { placeOrderSchema, updateOrderStatusSchema } from "../validators/orderValidator.js";
 import {
     createOrderService,
     getMyOrdersService,
@@ -9,34 +7,51 @@ import {
     cancelOrderService,
     getSellerOrdersService,
     updateOrderStatusService,
+    getSellerSingleOrderService,
 } from "../services/orderService.js";
 
 export const createOrder = async (req, res) => {
 
     try {
 
-        const orders = await createOrderService(
-            req.user._id,
-            req.body
-        );
+        const validatedData =
+            placeOrderSchema.parse(req.body);
+
+        const orders =
+            await createOrderService(
+                req.user._id,
+                validatedData
+            );
 
         return res.status(201).json({
+
             success: true,
-            message: "Order placed successfully.",
+
+            message:
+                "Order placed successfully.",
+
             orders,
+
         });
 
     } catch (error) {
 
-        return res.status(500).json({
+        console.log(
+            "CREATE ORDER ERROR:",
+            error
+        );
+
+        return res.status(400).json({
+
             success: false,
+
             message: error.message,
+
         });
 
     }
 
 };
-
 
 export const getMyOrders = async (req, res) => {
 
@@ -146,7 +161,8 @@ export const updateOrderStatus = async (req, res) => {
 
     try {
 
-        const { status } = req.body;
+        const { status } =
+            updateOrderStatusSchema.parse(req.body);
 
         const order = await updateOrderStatusService(
             req.user._id,
@@ -175,8 +191,29 @@ export const updateOrderStatus = async (req, res) => {
         });
 
     }
+};
+export const getSellerSingleOrder = async (req, res) => {
+
+    try {
+
+        const order = await getSellerSingleOrderService(
+            req.user._id,
+            req.params.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            order,
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
 
 };
-
-
 

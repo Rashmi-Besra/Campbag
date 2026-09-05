@@ -2,7 +2,7 @@ import Wishlist from "../models/Wishlist.js";
 import Product from "../models/Product.js";
 export const addToWishlist = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const { productId } = req.body;
 
     if (!productId) {

@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
-
+import {
+    createNotificationService,
+} from "./notificationService.js";
 
 
 export const createOrderService = async (
@@ -121,6 +123,32 @@ for (const [sellerId, items] of sellerOrders) {
     );
 
     createdOrders.push(order[0]);
+    console.log("===== CREATING SELLER NOTIFICATION =====");
+console.log("SELLER ID:", sellerId);
+console.log("ORDER ID:", order[0]._id);
+const notification =
+    await createNotificationService({
+
+        userId: sellerId,
+
+        type: "NEW_ORDER",
+
+        title: "New Order Received",
+
+        message:
+            `You received a new order containing ${items.length} product(s).`,
+
+        orderId: order[0]._id,
+
+        session,
+
+    });
+
+console.log(
+    "===== NOTIFICATION CREATED ====="
+);
+
+console.log(notification);
 
 }
 
@@ -139,17 +167,52 @@ for (const item of cart.items) {
     // }
 
     // await product.save({ session });
+    console.log("===== INVENTORY UPDATE =====");
+console.log("Product:", product.name);
+console.log("Buying quantity:", item.quantity);
+console.log("Current quantity:", product.quantity);
+console.log("Current soldCount:", product.soldCount);
 
-    await Product.findOneAndUpdate(
+   const updatedProduct = await Product.findOneAndUpdate(
     {
         _id: product._id,
         quantity: { $gte: item.quantity },
+        status: "Available",
     },
     {
-        $inc: { quantity: -item.quantity },
+        $inc: {
+            quantity: -item.quantity,
+            soldCount: item.quantity,
+        },
     },
-    { session }
+    {
+        session,
+        new: true,
+    }
 );
+console.log("UPDATED PRODUCT:");
+console.log(updatedProduct);
+
+if (!updatedProduct) {
+    throw new Error(
+        `${product.name} is no longer available in the requested quantity.`
+    );
+}
+
+if (updatedProduct.quantity === 0) {
+
+     await Product.findByIdAndUpdate(
+        product._id,
+        {
+            $set: {
+                status: "Sold",
+            },
+        },
+        {
+            session,
+        }
+    );
+}
 
 }
 
@@ -197,6 +260,8 @@ export const getMyOrdersService = async (
 
 };
 
+
+
 export const cancelOrderService = async (
     buyerId,
     orderId
@@ -240,22 +305,47 @@ export const cancelOrderService = async (
 
             const product = item.product;
 
-            product.quantity += item.quantity;
+            const restoredProduct = await Product.findByIdAndUpdate(
+                product._id,
+                {
+                    $inc: {
+                        quantity: item.quantity,
+                        soldCount: -item.quantity,
+                    },
+                },
+                {
+                    session,
+                    new: true,
+                }
+            );
 
-            if (
-                product.status === "Sold" &&
-                product.quantity > 0
-            ) {
-                product.status = "Available";
+            if (!restoredProduct) {
+                throw new Error(
+                    `${product.name} could not be restored.`
+                );
             }
 
-            await product.save({ session });
+            if (restoredProduct.quantity > 0) {
+                restoredProduct.status = "Available";
 
+                await restoredProduct.save({ session });
+            }
         }
 
+        // Update order status
         order.orderStatus = "Cancelled";
 
         await order.save({ session });
+
+        // Create seller notification
+        await createNotificationService({
+            userId: order.seller,
+            type: "ORDER_CANCELLED",
+            title: "Order Cancelled",
+            message: "A buyer has cancelled an order.",
+            orderId: order._id,
+            session,
+        });
 
         await session.commitTransaction();
 
@@ -274,6 +364,7 @@ export const cancelOrderService = async (
     }
 
 };
+
 
 export const getSingleOrderService = async (
     buyerId,
@@ -296,83 +387,110 @@ export const getSingleOrderService = async (
 };
 
 export const updateOrderStatusService = async (
-
     sellerId,
-
     orderId,
-
     newStatus
-
 ) => {
-    console.log("SELLER ID:", sellerId);
-    console.log("ORDER ID:", orderId);
 
+    const allowedTransitions = {
+        Placed: ["Accepted"],
+        Accepted: ["Packed"],
+        Packed: ["Out for Delivery"],
+        "Out for Delivery": ["Delivered"],
+    };
 
     const order = await Order.findOne({
-
         _id: orderId,
-
         seller: sellerId,
-
     });
-    
-
-console.log("ORDER WITHOUT SELLER FILTER:", order);
-
-    console.log("FOUND ORDER:", order);
 
     if (!order) {
-
         throw new Error("Order not found.");
-
     }
 
     if (order.orderStatus === "Cancelled") {
-
         throw new Error(
             "Cancelled orders cannot be updated."
         );
-
     }
 
     if (order.orderStatus === "Delivered") {
-
         throw new Error(
             "Order already delivered."
         );
-
     }
 
-    const allowedTransitions = {
-
-        Placed: ["Accepted"],
-
-        Accepted: ["Packed"],
-
-        Packed: ["Out for Delivery"],
-
-        "Out for Delivery": ["Delivered"],
-
-    };
+    const allowedNextStatuses =
+        allowedTransitions[order.orderStatus];
 
     if (
-        !allowedTransitions[
-            order.orderStatus
-        ]?.includes(newStatus)
+        !allowedNextStatuses ||
+        !allowedNextStatuses.includes(newStatus)
     ) {
-
         throw new Error(
-            `Cannot change status from ${order.orderStatus} to ${newStatus}`
+            `Cannot change status from ${order.orderStatus} to ${newStatus}.`
         );
-
     }
 
     order.orderStatus = newStatus;
 
     await order.save();
 
-    return order;
+    let notificationType;
+    let notificationTitle;
+    let notificationMessage;
 
+    switch (newStatus) {
+
+        case "Accepted":
+            notificationType = "ORDER_ACCEPTED";
+            notificationTitle = "Order Accepted";
+            notificationMessage =
+                "Your order has been accepted by the seller.";
+            break;
+
+        case "Packed":
+            notificationType = "ORDER_PACKED";
+            notificationTitle = "Order Packed";
+            notificationMessage =
+                "Your order has been packed and is ready for delivery.";
+            break;
+
+        case "Out for Delivery":
+            notificationType = "ORDER_OUT_FOR_DELIVERY";
+            notificationTitle = "Order Out for Delivery";
+            notificationMessage =
+                "Your order is now out for delivery.";
+            break;
+
+        case "Delivered":
+            notificationType = "ORDER_DELIVERED";
+            notificationTitle = "Order Delivered";
+            notificationMessage =
+                "Your order has been delivered successfully.";
+            break;
+
+        default:
+            throw new Error(
+                `Unsupported notification status: ${newStatus}`
+            );
+    }
+
+    await createNotificationService({
+
+        userId: order.user,
+
+        type: notificationType,
+
+        title: notificationTitle,
+
+        message: notificationMessage,
+
+        orderId: order._id,
+
+    });
+
+    return order;
 };
 
 export const getSellerOrdersService = async (sellerId) => {
@@ -389,3 +507,23 @@ export const getSellerOrdersService = async (sellerId) => {
     return orders;
 
 };
+
+export const getSellerSingleOrderService = async (
+    sellerId,
+    orderId
+) => {
+
+    const order = await Order.findOne({
+        _id: orderId,
+        seller: sellerId,
+    })
+    .populate("user", "name email profileImage")
+    .populate("items.product");
+
+    if (!order) {
+        throw new Error("Order not found.");
+    }
+
+    return order;
+};
+

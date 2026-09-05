@@ -5,104 +5,196 @@ import {
     deleteReviewService,
 } from "../services/reviewService.js";
 
+import {
+    createReviewSchema,
+    updateReviewSchema,
+} from "../Validators/reviewValidator.js";
+
+
+// ==============================
+// CREATE REVIEW
+// ==============================
+
 export const createReview = async (req, res) => {
 
     try {
 
-        const review = await createReviewService(
-            req.user._id,
-            req.body
-        );
+        const validatedData =
+            createReviewSchema.parse(req.body);
 
-        res.status(201).json({
+        const review =
+            await createReviewService(
+                req.user._id,
+                validatedData
+            );
+
+        return res.status(201).json({
+
             success: true,
-            message: "Review added successfully",
+
+            message: "Review added successfully.",
+
             review,
+
         });
 
     } catch (error) {
 
-        res.status(500).json({
+        console.log(
+            "CREATE REVIEW ERROR:",
+            error
+        );
+
+        return res.status(400).json({
+
             success: false,
+
             message: error.message,
+
         });
 
     }
-
 };
 
-export const getProductReviews = async (req, res) => {
+
+// ==============================
+// GET PRODUCT REVIEWS
+// ==============================
+
+export const getProductReviews = async (
+    req,
+    res
+) => {
 
     try {
 
-        const reviews = await getProductReviewsService(
-            req.params.productId
-        );
+        const reviews =
+            await getProductReviewsService(
+                req.params.productId
+            );
 
-        res.json({
+        return res.status(200).json({
+
             success: true,
+
             reviews,
+
         });
 
     } catch (error) {
 
-        res.status(500).json({
+        console.log(
+            "GET REVIEWS ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+
             success: false,
+
             message: error.message,
+
         });
 
     }
-
 };
 
-export const updateReview = async (req, res) => {
+
+// ==============================
+// UPDATE REVIEW
+// ==============================
+
+export const updateReview = async (
+    req,
+    res
+) => {
 
     try {
 
-        const review = await updateReviewService(
-            req.user._id,
-            req.params.id,
-            req.body
-        );
+        const validatedData =
+            updateReviewSchema.parse(req.body);
 
-        res.json({
+        const review =
+            await updateReviewService(
+
+                req.user._id,
+
+                req.params.id,
+
+                validatedData
+
+            );
+
+        return res.status(200).json({
+
             success: true,
-            message: "Review updated successfully",
+
+            message: "Review updated successfully.",
+
             review,
+
         });
 
     } catch (error) {
 
-        res.status(500).json({
+        console.log(
+            "UPDATE REVIEW ERROR:",
+            error
+        );
+
+        return res.status(400).json({
+
             success: false,
+
             message: error.message,
+
         });
 
     }
-
 };
 
-export const deleteReview = async (req, res) => {
+
+// ==============================
+// DELETE REVIEW
+// ==============================
+
+export const deleteReview = async (
+    req,
+    res
+) => {
 
     try {
 
         await deleteReviewService(
+
             req.user._id,
+
             req.params.id
+
         );
 
-        res.json({
+        return res.status(200).json({
+
             success: true,
-            message: "Review deleted successfully",
+
+            message: "Review deleted successfully.",
+
         });
 
     } catch (error) {
 
-        res.status(500).json({
+        console.log(
+            "DELETE REVIEW ERROR:",
+            error
+        );
+
+        return res.status(400).json({
+
             success: false,
+
             message: error.message,
+
         });
 
     }
-
 };

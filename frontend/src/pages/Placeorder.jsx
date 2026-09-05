@@ -83,26 +83,28 @@ const PlaceOrder = () => {
 
         }
 
-        const orderData = {
+      const orderData = {
+    paymentMethod: method === "cod" ? "COD" : "ONLINE",
 
-            deliveryMethod,
+    deliveryMethod,
 
-            address:
-                deliveryMethod === "HOSTEL_DELIVERY"
-                    ? formData.address
-                    : "",
+    deliveryDetails: {
+        address:
+            deliveryMethod === "HOSTEL_DELIVERY"
+                ? formData.address
+                : "",
 
-            phone:
-                deliveryMethod === "HOSTEL_DELIVERY"
-                    ? formData.phone
-                    : "",
+        phone:
+            deliveryMethod === "HOSTEL_DELIVERY"
+                ? formData.phone
+                : "",
 
-            instructions:
-                deliveryMethod === "HOSTEL_DELIVERY"
-                    ? formData.instructions
-                    : "",
-
-        };
+        instructions:
+            deliveryMethod === "HOSTEL_DELIVERY"
+                ? formData.instructions
+                : "",
+    },
+};
 
         try {
 

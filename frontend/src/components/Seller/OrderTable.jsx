@@ -1,78 +1,113 @@
-import React, { useEffect, useState } from "react";
-import {
-    getSellerOrders,
-    updateOrderStatus,
-} from "../../services/orderService";
+import React, { useEffect,useState } from "react";
+import { updateOrderStatus } from "../../services/orderService";
+import { useNavigate } from "react-router-dom";
 
-const OrderTable = () => {
+const OrderTable = ({ orders = [] }) => {
 
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState(null);
 
-    const fetchOrders = async () => {
+    const [localOrders, setLocalOrders] = useState(orders);
 
-        try {
-
-            const data = await getSellerOrders();
-
-            setOrders(data.orders || []);
-
-        } catch (error) {
-
-            console.error(
-                "Failed to fetch seller orders:",
-                error
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchOrders();
-    }, []);
+
+    setLocalOrders(orders);
+
+}, [orders]);
+
+    /* ---------------- Next Status ---------------- */
 
     const getNextStatus = (status) => {
 
         const nextStatuses = {
+
             Placed: "Accepted",
+
             Accepted: "Packed",
+
             Packed: "Out for Delivery",
+
             "Out for Delivery": "Delivered",
+
         };
 
         return nextStatuses[status] || null;
+
     };
 
-    const handleStatusUpdate = async (orderId, currentStatus) => {
 
-        const nextStatus = getNextStatus(currentStatus);
+    /* ---------------- Action Text ---------------- */
 
-        if (!nextStatus) return;
+    const getActionText = (nextStatus) => {
+
+        if (nextStatus === "Accepted") {
+            return "Accept Order";
+        }
+
+        if (nextStatus === "Packed") {
+            return "Pack Order";
+        }
+
+        if (nextStatus === "Out for Delivery") {
+            return "Dispatch";
+        }
+
+        if (nextStatus === "Delivered") {
+            return "Mark Delivered";
+        }
+
+        return "";
+
+    };
+
+
+    /* ---------------- Update Status ---------------- */
+
+    const handleStatusUpdate = async (
+        orderId,
+        currentStatus
+    ) => {
+
+        const nextStatus =
+            getNextStatus(currentStatus);
+
+        if (!nextStatus) {
+            return;
+        }
 
         try {
 
             setUpdatingId(orderId);
 
-            const data = await updateOrderStatus(
-                orderId,
-                nextStatus
+            const response =
+                await updateOrderStatus(
+                    orderId,
+                    nextStatus
+                );
+
+            console.log(
+                "ORDER STATUS UPDATED:",
+                response
             );
 
-            setOrders((prevOrders) =>
-                prevOrders.map((order) =>
-                    order._id === orderId
-                        ? {
-                              ...order,
-                              orderStatus:
-                                  data.order.orderStatus,
-                          }
-                        : order
-                )
+
+            /* Update only this order */
+
+            setLocalOrders(
+                (previousOrders) =>
+                    previousOrders.map(
+                        (order) =>
+                            order._id === orderId
+                                ? {
+                                      ...order,
+                                      orderStatus:
+                                          response.order
+                                              ?.orderStatus ||
+                                          nextStatus,
+                                  }
+                                : order
+                    )
             );
 
         } catch (error) {
@@ -92,18 +127,22 @@ const OrderTable = () => {
             setUpdatingId(null);
 
         }
+
     };
 
-    if (loading) {
-        return <p className="p-6">Loading orders...</p>;
-    }
+
+    /* ---------------- Render ---------------- */
 
     return (
+
         <div className="overflow-x-auto">
 
             <table className="w-full">
 
+                {/* ---------- Header ---------- */}
+
                 <thead>
+
                     <tr className="border-b text-left text-sm text-gray-500">
 
                         <th className="px-4 py-3">
@@ -112,6 +151,10 @@ const OrderTable = () => {
 
                         <th className="px-4 py-3">
                             Buyer
+                        </th>
+
+                        <th className="px-4 py-3">
+                            Date
                         </th>
 
                         <th className="px-4 py-3">
@@ -127,84 +170,198 @@ const OrderTable = () => {
                         </th>
 
                     </tr>
+
                 </thead>
+
+
+                {/* ---------- Body ---------- */}
 
                 <tbody>
 
-                    {orders.map((order) => {
+                    {localOrders.map((order) => {
 
                         const nextStatus =
                             getNextStatus(
                                 order.orderStatus
                             );
 
+
                         return (
+
                             <tr
                                 key={order._id}
-                                className="border-b"
+                                className="border-b hover:bg-gray-50"
                             >
 
+                                {/* Order ID */}
+
                                 <td className="px-4 py-4">
-                                    #{order._id.slice(-6)}
+
+                                    <button
+                                        onClick={() =>
+                                            navigate(
+                                                `/seller/orders/${order._id}`
+                                            )
+                                        }
+                                        className="font-medium hover:underline"
+                                    >
+
+                                        #
+                                        {order._id.slice(-6)}
+
+                                    </button>
+
                                 </td>
 
+
+                                {/* Buyer */}
+
                                 <td className="px-4 py-4">
-                                    {order.user?.name ||
-                                        "Unknown"}
+
+                                    <div>
+
+                                        <p className="font-medium">
+
+                                            {order.user?.name ||
+                                                "Unknown"}
+
+                                        </p>
+
+                                        {order.user?.collegeEmail && (
+
+                                            <p className="text-xs text-gray-500">
+
+                                                {
+                                                    order.user
+                                                        .collegeEmail
+                                                }
+
+                                            </p>
+
+                                        )}
+
+                                    </div>
+
                                 </td>
 
-                                <td className="px-4 py-4">
-                                    ₹{order.totalAmount}
+
+                                {/* Date */}
+
+                                <td className="px-4 py-4 text-sm text-gray-600">
+
+                                    {order.createdAt
+                                        ? new Date(
+                                              order.createdAt
+                                          ).toLocaleDateString(
+                                              "en-IN",
+                                              {
+                                                  day: "numeric",
+                                                  month: "short",
+                                                  year: "numeric",
+                                              }
+                                          )
+                                        : "-"}
+
                                 </td>
 
-                                <td className="px-4 py-4">
-                                    {order.orderStatus}
+
+                                {/* Amount */}
+
+                                <td className="px-4 py-4 font-medium">
+
+                                    ₹
+                                    {Number(
+                                        order.totalAmount || 0
+                                    ).toLocaleString("en-IN")}
+
                                 </td>
 
+
+                                {/* Status */}
+
                                 <td className="px-4 py-4">
 
-                                   {nextStatus ? (
+                                    <span
+                                        className={`
+                                            text-sm font-medium
+                                            ${
+                                                order.orderStatus ===
+                                                "Cancelled"
+                                                    ? "text-red-500"
+                                                    : order.orderStatus ===
+                                                      "Delivered"
+                                                    ? "text-green-600"
+                                                    : order.orderStatus ===
+                                                      "Out for Delivery"
+                                                    ? "text-blue-600"
+                                                    : "text-gray-700"
+                                            }
+                                        `}
+                                    >
 
-    <button
-        onClick={() =>
-            handleStatusUpdate(
-                order._id,
-                order.orderStatus
-            )
-        }
-        disabled={updatingId === order._id}
-        className="px-4 py-2 bg-black text-white rounded-lg text-sm disabled:opacity-50"
-    >
-       {updatingId === order._id
-    ? "Updating..."
-    : nextStatus === "Accepted"
-        ? "Accept Order"
-        : nextStatus === "Packed"
-            ? "Pack Order"
-            : nextStatus === "Out for Delivery"
-                ? "Dispatch"
-                : "Mark Delivered"}
-    </button>
+                                        {order.orderStatus}
 
-) : (
+                                    </span>
 
-    <span
-        className={`text-sm font-medium ${
-            order.orderStatus === "Cancelled"
-                ? "text-red-500"
-                : "text-green-600"
-        }`}
-    >
-        {order.orderStatus === "Cancelled"
-            ? "Cancelled"
-            : "Completed"}
-    </span>
+                                </td>
 
-)}
+
+                                {/* Action */}
+
+                                <td className="px-4 py-4">
+
+                                    {nextStatus ? (
+
+                                        <button
+                                            onClick={() =>
+                                                handleStatusUpdate(
+                                                    order._id,
+                                                    order.orderStatus
+                                                )
+                                            }
+                                            disabled={
+                                                updatingId ===
+                                                order._id
+                                            }
+                                            className="px-4 py-2 bg-black text-white rounded-lg text-sm disabled:opacity-50"
+                                        >
+
+                                            {updatingId ===
+                                            order._id
+                                                ? "Updating..."
+                                                : getActionText(
+                                                      nextStatus
+                                                  )}
+
+                                        </button>
+
+                                    ) : (
+
+                                        <span
+                                            className={`
+                                                text-sm font-medium
+                                                ${
+                                                    order.orderStatus ===
+                                                    "Cancelled"
+                                                        ? "text-red-500"
+                                                        : "text-green-600"
+                                                }
+                                            `}
+                                        >
+
+                                            {order.orderStatus ===
+                                            "Cancelled"
+                                                ? "Cancelled"
+                                                : "Completed"}
+
+                                        </span>
+
+                                    )}
 
                                 </td>
 
                             </tr>
+
                         );
 
                     })}
@@ -213,14 +370,25 @@ const OrderTable = () => {
 
             </table>
 
-            {orders.length === 0 && (
-                <p className="p-6 text-center text-gray-500">
-                    No orders yet.
-                </p>
+
+            {/* ---------- Empty State ---------- */}
+
+            {localOrders.length === 0 && (
+
+                <div className="p-8 text-center">
+
+                    <p className="text-gray-500">
+                        No recent orders yet.
+                    </p>
+
+                </div>
+
             )}
 
         </div>
+
     );
+
 };
 
 export default OrderTable;

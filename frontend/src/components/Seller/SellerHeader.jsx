@@ -1,8 +1,21 @@
-import React from "react";
+import React, {useEffect} from "react";
+import NotificationBell
+    from "./NotificationBell";
+
+import socket from "../../services/socket";
 
 const SellerHeader = ({ profile }) => {
 
     console.log("SELLER HEADER PROFILE:", profile);
+    useEffect(() => {
+        socket.on("connect", () => {
+            console.log("Frontend socket connected:", socket.id);
+        });
+
+        return () => {
+            socket.off("connect");
+        };
+    }, []);
 
     return (
 
@@ -48,7 +61,7 @@ const SellerHeader = ({ profile }) => {
                         alt="Seller"
                         className="w-10 h-10 rounded-full object-cover"
                     />
-
+                    <NotificationBell />
                 </div>
 
             </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import { connectSocket } from "../services/socket";
 import { loginUser } from "../services/authService";
 
 const Login = () => {
@@ -41,6 +41,7 @@ if (response.success) {
     );
 
     toast.success(response.message);
+    connectSocket();
 
     navigate("/");
 }

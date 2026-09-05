@@ -48,7 +48,7 @@ for (const file of req.files) {
   const uploadresult = await cloudinary.uploader.upload(
     `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
     {
-      folder: "CampusMart/products",
+      folder: "CampusBag/products",
     }
   );
 

@@ -1,5 +1,6 @@
 import express from "express";
-import authMiddleware from "../middleware/auth.js";
+
+import auth from "../middleware/auth.js";
 
 import {
     createReview,
@@ -10,27 +11,36 @@ import {
 
 const router = express.Router();
 
+
+// Create
 router.post(
     "/",
-    authMiddleware,
+    auth,
     createReview
 );
 
+
+// Get product reviews
 router.get(
     "/product/:productId",
     getProductReviews
 );
 
+
+// Update
 router.put(
     "/:id",
-    authMiddleware,
+    auth,
     updateReview
 );
 
+
+// Delete
 router.delete(
     "/:id",
-    authMiddleware,
+    auth,
     deleteReview
 );
+
 
 export default router;

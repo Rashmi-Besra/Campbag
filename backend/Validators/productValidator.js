@@ -18,7 +18,7 @@ export const addProductSchema = z.object({
         "New",
         "Like New",
         "Good",
-        "Fair"
+        "Used"
     ]),
     branch: z.string().optional(),
     semester: z.coerce.number().optional(),

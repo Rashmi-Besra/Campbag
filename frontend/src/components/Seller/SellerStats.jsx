@@ -1,8 +1,6 @@
 import React from "react";
 
-const SellerStats = ({ profile }) => {
-
-    console.log("SELLER STATS PROFILE:", profile);
+const SellerStats = ({ dashboard }) => {
 
     return (
 
@@ -11,11 +9,11 @@ const SellerStats = ({ profile }) => {
             <div className="bg-white p-5 rounded-lg shadow-sm">
 
                 <p className="text-sm text-gray-500">
-                    Trust Score
+                    Total Products
                 </p>
 
                 <h2 className="text-2xl font-semibold mt-2">
-                    {profile?.trustScore ?? 0}
+                    {dashboard?.totalProducts ?? 0}
                 </h2>
 
             </div>
@@ -24,11 +22,11 @@ const SellerStats = ({ profile }) => {
             <div className="bg-white p-5 rounded-lg shadow-sm">
 
                 <p className="text-sm text-gray-500">
-                    Rating
+                    Total Orders
                 </p>
 
                 <h2 className="text-2xl font-semibold mt-2">
-                    {profile?.rating ?? 0}
+                    {dashboard?.totalOrders ?? 0}
                 </h2>
 
             </div>
@@ -37,11 +35,11 @@ const SellerStats = ({ profile }) => {
             <div className="bg-white p-5 rounded-lg shadow-sm">
 
                 <p className="text-sm text-gray-500">
-                    Total Sales
+                    Pending Orders
                 </p>
 
                 <h2 className="text-2xl font-semibold mt-2">
-                    {profile?.totalSales ?? 0}
+                    {dashboard?.pendingOrders ?? 0}
                 </h2>
 
             </div>
@@ -50,15 +48,11 @@ const SellerStats = ({ profile }) => {
             <div className="bg-white p-5 rounded-lg shadow-sm">
 
                 <p className="text-sm text-gray-500">
-                    Seller Status
+                    Total Revenue
                 </p>
 
                 <h2 className="text-2xl font-semibold mt-2">
-
-                    {profile?.sellerVerified
-                        ? "Verified"
-                        : "Pending"}
-
+                    ₹{dashboard?.totalRevenue ?? 0}
                 </h2>
 
             </div>

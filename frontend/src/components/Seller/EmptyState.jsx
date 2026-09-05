@@ -1,30 +1,28 @@
-import { FaBoxOpen } from "react-icons/fa";
+import React from "react";
 
-const EmptyState = () => {
-  return (
-    <div className="flex flex-col items-center justify-center py-20">
+const EmptyState = ({
+    title = "No Products Found",
+    message = "You haven't added any products yet.",
+}) => {
 
-      <FaBoxOpen
-        size={70}
-        className="text-gray-400 mb-6"
-      />
+    return (
 
-      <h2 className="text-2xl font-semibold text-gray-700">
-        No Products Found
-      </h2>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
 
-      <p className="text-gray-500 mt-2 mb-6 text-center">
-        You haven't added any products yet.
-      </p>
+           
 
-      <button
-        className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition"
-      >
-        Add Your First Product
-      </button>
+            <h2 className="text-xl font-semibold text-gray-800">
+                {title}
+            </h2>
 
-    </div>
-  );
+            <p className="text-gray-500 mt-2">
+                {message}
+            </p>
+
+        </div>
+
+    );
+
 };
 
 export default EmptyState;

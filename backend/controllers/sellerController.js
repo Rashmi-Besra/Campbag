@@ -1,8 +1,11 @@
 import { getDashboardData, getSellerProductsService,
     createProductService,
     deleteSellerProductService, getSellerProductByIdService,
-    updateSellerProductService ,getSellerOrdersService,
-    updateOrderStatusService } from "../services/sellerService.js";
+    updateSellerProductService,
+     } from "../services/sellerService.js";
+import {
+    getSellerOrdersService, updateOrderStatusService,
+} from "../services/orderService.js";
 
 
 export const getDashboard = async (req, res) => {

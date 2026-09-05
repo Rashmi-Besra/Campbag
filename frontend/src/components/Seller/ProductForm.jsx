@@ -59,7 +59,7 @@ const ProductForm = ({
       data.append(key, formData[key]);
     });
 
-    iimages.forEach((image) => {
+    images.forEach((image) => {
   if (image instanceof File) {
     data.append("images", image);
   }

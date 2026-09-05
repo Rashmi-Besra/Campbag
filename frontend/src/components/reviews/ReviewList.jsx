@@ -7,7 +7,7 @@ const ReviewList = ({
   onDelete,
 }) => {
 
-  if (reviews.length === 0) {
+  if (!reviews||reviews.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow p-8 text-center">
 

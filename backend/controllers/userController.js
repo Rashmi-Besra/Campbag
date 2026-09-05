@@ -245,7 +245,12 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    if (otpRecord.otp !== otp) {
+console.log("OTP FROM DATABASE:", otpRecord.otp);
+console.log("OTP FROM REQUEST:", otp);
+console.log("DB OTP TYPE:", typeof otpRecord.otp);
+console.log("REQUEST OTP TYPE:", typeof otp);
+
+if (String(otpRecord.otp) !== String(otp))  {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP.",

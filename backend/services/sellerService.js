@@ -1,7 +1,10 @@
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
+import Order from "../models/Order.js";
+import User from "../models/User.js";
+
 import { cloudinary } from "../config/cloudinary.js";
 import streamifier from "streamifier";
-import User from "../models/User.js";
 
 /* ---------------- Dashboard ---------------- */
 
@@ -11,11 +14,55 @@ export const getDashboardData = async (sellerId) => {
         seller: sellerId,
     });
 
+    const totalOrders = await Order.countDocuments({
+        seller: sellerId,
+    });
+
+    const pendingOrders = await Order.countDocuments({
+        seller: sellerId,
+        orderStatus: {
+            $in: ["Placed", "Accepted", "Packed", "Out for Delivery"],
+        },
+    });
+
+    const revenueResult = await Order.aggregate([
+        {
+            $match: {
+                seller: new mongoose.Types.ObjectId(sellerId),
+                orderStatus: "Delivered",
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                totalRevenue: {
+                    $sum: "$totalAmount",
+                },
+            },
+        },
+    ]);
+
+    const totalRevenue =
+        revenueResult.length > 0
+            ? revenueResult[0].totalRevenue
+            : 0;
+
+    const recentOrders = await Order.find({
+        seller: sellerId,
+    })
+        .populate("user", "name profileImage")
+        .populate("items.product", "name images price")
+        .sort({
+            createdAt: -1,
+        })
+        .limit(5);
+
     return {
         totalProducts,
-        totalOrders: 0,
-        pendingOrders: 0,
-        totalRevenue: 0,
+        totalOrders,
+        pendingOrders,
+        totalRevenue,
+        recentOrders,
     };
 };
 
@@ -103,7 +150,7 @@ if (!seller) {
    const product = await Product.create({
 
     seller: sellerId,
-    sellername: seller.name,
+    
 
     name: productData.name,
     description: productData.description,
@@ -224,89 +271,6 @@ if (files && files.length > 0) {
 
 };
 
-import Order from "../models/Order.js";
 
-export const getSellerOrdersService = async (sellerId) => {
 
-    const orders = await Order.find({
-        seller: sellerId,
-    })
-    .populate("user", "name collegeEmail profileImage")
-    .populate("items.product")
-    .sort({ createdAt: -1 });
 
-    return orders;
-
-};
-
-export const updateOrderStatusService = async (
-
-    sellerId,
-
-    orderId,
-
-    newStatus
-
-) => {
-
-    const order = await Order.findOne({
-
-        _id: orderId,
-
-        seller: sellerId,
-
-    });
-
-    if (!order) {
-
-        throw new Error("Order not found.");
-
-    }
-
-    if (order.orderStatus === "Cancelled") {
-
-        throw new Error(
-            "Cancelled orders cannot be updated."
-        );
-
-    }
-
-    if (order.orderStatus === "Delivered") {
-
-        throw new Error(
-            "Order already delivered."
-        );
-
-    }
-
-    const allowedTransitions = {
-
-        Placed: ["Accepted"],
-
-        Accepted: ["Packed"],
-
-        Packed: ["Out for Delivery"],
-
-        "Out for Delivery": ["Delivered"],
-
-    };
-
-    if (
-        !allowedTransitions[
-            order.orderStatus
-        ]?.includes(newStatus)
-    ) {
-
-        throw new Error(
-            `Cannot change status from ${order.orderStatus} to ${newStatus}`
-        );
-
-    }
-
-    order.orderStatus = newStatus;
-
-    await order.save();
-
-    return order;
-
-};

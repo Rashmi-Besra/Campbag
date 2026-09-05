@@ -1,12 +1,24 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, {
+    useContext,
+    useEffect,
+    useState,
+    useRef
+} from "react";
+
 import { useParams } from "react-router-dom";
+
 import { ShopContext } from "../context/ShopContext";
-import { assets } from "../assets/assets";
+
 import RelatedProducts from "../components/RelatedProducts";
+
 import RatingSummary from "../components/reviews/RatingSummary";
+
 import { toast } from "react-toastify";
+
 import ReviewForm from "../components/reviews/ReviewForm";
+
 import ReviewList from "../components/reviews/ReviewList";
+
 import {
     getProductReviews,
     createReview,
@@ -14,6 +26,9 @@ import {
     deleteReview,
 } from "../services/reviewService";
 
+import {
+    getMyOrders,
+} from "../services/orderService";
 
 const Product = () => {
   const { productId } = useParams();
@@ -25,10 +40,12 @@ const Product = () => {
   const [open, setOpen] = useState("");
   const dropdownRef = useRef(null);
   const [reviews, setReviews] = useState([]);
+ 
 
 const [editingReview, setEditingReview] = useState(null);
 
 const [reviewLoading, setReviewLoading] = useState(false);
+const [reviewOrderId, setReviewOrderId] = useState(null);
 
 
 const fetchproductdata = () => {
@@ -40,7 +57,7 @@ const fetchproductdata = () => {
   }
 };
 
-  const handleReviewSubmit = async (formData) => {
+const handleReviewSubmit = async (formData) => {
 
     try {
 
@@ -50,7 +67,10 @@ const fetchproductdata = () => {
 
             await updateReview(
                 editingReview._id,
-                formData
+                {
+                    rating: formData.rating,
+                    comment: formData.comment,
+                }
             );
 
             toast.success(
@@ -59,31 +79,48 @@ const fetchproductdata = () => {
 
         } else {
 
+            if (!reviewOrderId) {
+
+                toast.error(
+                    "You can review this product only after it has been delivered."
+                );
+
+                return;
+            }
+
             await createReview({
 
-                ...formData,
+                productId,
 
-                product: productId,
+                orderId: reviewOrderId,
+
+                rating: formData.rating,
+
+                comment: formData.comment,
 
             });
 
             toast.success(
-                "Review added successfully."
+                "Review submitted successfully."
             );
-
         }
 
-       await fetchReviews();
-await fetchProducts();
+        await fetchReviews();
 
+        await fetchProducts();
 
         setEditingReview(null);
 
     } catch (error) {
 
+        console.log(
+            "Review submission failed:",
+            error
+        );
+
         toast.error(
             error.response?.data?.message ||
-            error.message
+            "Failed to save review."
         );
 
     } finally {
@@ -91,7 +128,6 @@ await fetchProducts();
         setReviewLoading(false);
 
     }
-
 };
 
 const handleDeleteReview = async (reviewId) => {
@@ -119,12 +155,43 @@ const handleDeleteReview = async (reviewId) => {
 };
 
 const fetchReviews = async () => {
-  try {
-    const data = await getProductReviews(productId);
-    setReviews(data.reviews);
-  } catch (error) {
-    console.log(error);
-  }
+
+    try {
+
+        console.log(
+            "Fetching reviews for product:",
+            productId
+        );
+
+        const data = await getProductReviews(productId);
+
+        console.log(
+            "REVIEWS API RESPONSE:",
+            data
+        );
+
+        console.log(
+            "REVIEWS ARRAY:",
+            data?.reviews
+        );
+
+        setReviews(
+            Array.isArray(data?.reviews)
+                ? data.reviews
+                : []
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Failed to fetch reviews:",
+            error
+        );
+
+        setReviews([]);
+
+    }
+
 };
 
 const handleEditReview = (review) => {
@@ -152,6 +219,44 @@ useEffect(() => {
   }
 }, [productId]);
 
+
+useEffect(() => {
+
+    const findReviewOrder = async () => {
+
+        try {
+
+            const data = await getMyOrders();
+
+            const deliveredOrder = data.orders.find(
+                (order) =>
+                    order.orderStatus === "Delivered" &&
+                    order.items.some(
+                        (item) =>
+                            item.product?._id === productId
+                    )
+            );
+
+            if (deliveredOrder) {
+                setReviewOrderId(deliveredOrder._id);
+            }
+
+        } catch (error) {
+
+            console.log(
+                "Failed to find review order:",
+                error
+            );
+
+        }
+
+    };
+
+    if (productId && user) {
+        findReviewOrder();
+    }
+
+}, [productId, user]);
 
 console.log("Logged in user:", JSON.stringify(user, null, 2));
   return productData ? (
@@ -366,11 +471,11 @@ console.log("Logged in user:", JSON.stringify(user, null, 2));
 />
 
 <ReviewForm
-    initialReview={editingReview}
+    editingReview={editingReview}
     onSubmit={handleReviewSubmit}
     loading={reviewLoading}
 />
-
+{console.log("FINAL REVIEWS STATE:", reviews)}
 <ReviewList
     reviews={reviews}
     currentUserId={user?.id}

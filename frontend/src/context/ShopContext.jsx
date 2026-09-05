@@ -28,6 +28,10 @@ import {
     deleteProduct as deleteProductAPI
 } from "../services/sellerService";
 
+import {
+    cancelOrder as cancelOrderService
+} from "../services/orderService";
+
 
 export const ShopContext=createContext();
 
@@ -382,6 +386,45 @@ const deleteMyProduct = async (productId) => {
     }
 };
 
+const cancelOrder = async (orderId) => {
+
+    try {
+
+        const response =
+            await cancelOrderService(orderId);
+
+        if (response.success) {
+
+            toast.success(
+                "Order cancelled successfully."
+            );
+
+            await fetchOrders();
+
+            return response;
+
+        }
+
+        toast.error(
+            response.message ||
+            "Failed to cancel order."
+        );
+
+    } catch (error) {
+
+        console.log(
+            "CANCEL ORDER ERROR:",
+            error
+        );
+
+        toast.error(
+            error.response?.data?.message ||
+            "Failed to cancel order."
+        );
+
+        throw error;
+    }
+};
 
 useEffect(() => {
 
@@ -412,7 +455,7 @@ useEffect(() => {
         sellerStats, sellerOrders, sellerProducts,
         fetchSellerDashboard, fetchSellerOrders,
         updateOrderItemStatus, fetchMyProducts, deleteMyProduct,
-        user,setUser,fetchProducts
+        user,setUser,fetchProducts,cancelOrder
     }
        
     

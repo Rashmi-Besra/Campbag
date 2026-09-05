@@ -1,7 +1,8 @@
 import api from "../api/api";
 
-// Automatically attach JWT token
-
+// ===============================
+// Buyer Orders
+// ===============================
 
 // Place Order
 export const placeOrder = async (orderData) => {
@@ -14,14 +15,30 @@ export const placeOrder = async (orderData) => {
     return response.data;
 };
 
-// Get Orders
+
+// Get My Orders
 export const getOrders = async () => {
 
-    const { data } = await api.get("/order");
+    const response = await api.get(
+        "/order"
+    );
 
-    return data;
+    return response.data;
 };
 
+
+// Alias used by Product.jsx
+export const getMyOrders = async () => {
+
+    const response = await api.get(
+        "/order"
+    );
+
+    return response.data;
+};
+
+
+// Get Single Order
 export const getSingleOrder = async (id) => {
 
     const response = await api.get(
@@ -29,9 +46,10 @@ export const getSingleOrder = async (id) => {
     );
 
     return response.data;
-
 };
 
+
+// Cancel Order
 export const cancelOrder = async (id) => {
 
     const response = await api.patch(
@@ -39,22 +57,46 @@ export const cancelOrder = async (id) => {
     );
 
     return response.data;
-
 };
 
+
+// ===============================
+// Seller Orders
+// ===============================
+
+// Get Seller Orders
 export const getSellerOrders = async () => {
 
-    const response = await api.get("/order/seller");
+    const response = await api.get(
+        "/order/seller"
+    );
 
     return response.data;
-
 };
-export const updateOrderStatus = async (id, status) => {
+
+
+// Update Order Status
+export const updateOrderStatus = async (
+    id,
+    status
+) => {
+
     const response = await api.patch(
         `/order/${id}/status`,
         {
             status,
         }
+    );
+
+    return response.data;
+};
+
+
+// Get Seller Single Order
+export const getSellerSingleOrder = async (id) => {
+
+    const response = await api.get(
+        `/order/seller/${id}`
     );
 
     return response.data;

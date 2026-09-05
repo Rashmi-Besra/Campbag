@@ -1,17 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React from 'react'
 import {Routes,Route} from 'react-router-dom'
 import Home from './pages/Home'
@@ -43,6 +30,10 @@ import SellerProfile from './pages/SellerProfile';
 import PersonalInformation from "./pages/PersonalInformation";
 import AccountSettings from "./pages/AccountSettings";
 import DeleteAccount from "./pages/DeleteAccount";
+import SellerOrderDetails from "./pages/SellerOrderDetails";
+import OrderDetails from "./pages/OrderDetails";
+
+
 
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -102,6 +93,14 @@ const App = () => {
   element={<DeleteAccount />}
 />
 
+<Route
+    path="/seller/orders/:id"
+    element={<SellerOrderDetails />}
+/>
+<Route
+    path="/orders/:id"
+    element={<OrderDetails />}
+/>
       </Routes>
       <Footer/>
     </div>
